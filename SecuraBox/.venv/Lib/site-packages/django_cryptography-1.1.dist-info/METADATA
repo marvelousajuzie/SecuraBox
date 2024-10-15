@@ -1,0 +1,99 @@
+Metadata-Version: 2.1
+Name: django-cryptography
+Version: 1.1
+Summary: Easily encrypt data in Django
+Home-page: https://github.com/georgemarshall/django-cryptography
+Author: George Marshall
+Author-email: george@georgemarshall.name
+License: BSD-3-Clause
+Project-URL: Bug Reports, https://github.com/georgemarshall/django-cryptography/issues
+Project-URL: Source, https://github.com/georgemarshall/django-cryptography
+Project-URL: Documentation, https://django-cryptography.readthedocs.io
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 2.2
+Classifier: Framework :: Django :: 3.2
+Classifier: Framework :: Django :: 4.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Security :: Cryptography
+Requires-Python: >=3.6
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: Django
+Requires-Dist: cryptography
+Requires-Dist: django-appconf
+
+Django Cryptography
+===================
+
+A set of primitives for easily encrypting data in Django, wrapping
+the Python Cryptography_ library. Also provided is a drop in
+replacement for Django's own cryptographic primitives, using
+Cryptography_ as the backend provider.
+
+Do not forget to read the documentation_.
+
+.. START HIDDEN
+.. image:: https://img.shields.io/github/workflow/status/georgemarshall/django-cryptography/CI/stable%2F1.1.x
+   :target: https://github.com/georgemarshall/django-cryptography/actions/workflows/main.yml
+   :alt: GitHub Workflow Status (branch)
+.. image:: https://img.shields.io/codecov/c/github/georgemarshall/django-cryptography/stable/1.1.x
+   :target: https://codecov.io/gh/georgemarshall/django-cryptography/branch/stable%2F1.1.x
+   :alt: Codecov branch
+.. END HIDDEN
+
+Cryptography by example
+-----------------------
+
+Using symmetrical encryption to store sensitive data in the database.
+Wrap the desired model field with ``encrypt`` to easily
+protect its contents.
+
+.. code-block:: python
+
+   from django.db import models
+
+   from django_cryptography.fields import encrypt
+
+
+   class MyModel(models.Model):
+       name = models.CharField(max_length=50)
+       sensitive_data = encrypt(models.CharField(max_length=50))
+
+The data will now be automatically encrypted when saved to the
+database.  ``encrypt`` uses an encryption that allows for
+bi-directional data retrieval.
+
+Requirements
+------------
+
+* Python_ (3.6, 3.7, 3.8, 3.9, 3.10)
+* Cryptography_ (2.0+)
+* Django_ (2.2, 3.2, 4.0)
+
+Installation
+------------
+
+.. code-block:: console
+
+   pip install django-cryptography
+
+.. _Cryptography: https://cryptography.io/
+.. _Django: https://www.djangoproject.com/
+.. _Python: https://www.python.org/
+.. _documentation: https://django-cryptography.readthedocs.io/en/latest/
+
+
