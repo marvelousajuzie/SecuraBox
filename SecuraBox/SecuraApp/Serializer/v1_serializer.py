@@ -33,6 +33,16 @@ class CustomUserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+
+
+
+class VerifyEmailSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField
+
+
+
+    
+
 class createPinSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pin
