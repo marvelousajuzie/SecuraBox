@@ -183,4 +183,3 @@ EMAIL_HOST_USER = 'marvelousajuzie12@gmail.com'
 EMAIL_HOST_PASSWORD = 'nldl rjbm iayq dbvs' 
 DEFAULT_FROM_EMAIL = 'marvelousajuzie12@gmail.com' 
 
-
