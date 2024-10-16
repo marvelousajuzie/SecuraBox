@@ -1,4 +1,4 @@
-
+from django.utils import timezone
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
@@ -9,8 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from SecuraApp.Serializer.v1_serializer import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.mail import send_mail
-from django.conf import settings
+from SecuraApp.emails import *
 
 
 
@@ -27,11 +26,16 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def create(self, request, *args, **Kwargs):                                    
         serializer = self.serializer_class(data= request.data)
         if serializer.is_valid(raise_exception= True):
-            serializer.save()
-            user = serializer.data
-            return Response({'data': user}, status= status.HTTP_201_CREATED)
+         user = serializer.save()
+         send_otp_via_email(serializer.data['email'])
+         return Response(serializer.data,  status= status.HTTP_201_CREATED)
         return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
-    
+
+
+
+
+
+
 
 
 
