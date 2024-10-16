@@ -34,6 +34,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'SecuraApp',
     'django_cryptography',
+<<<<<<< HEAD
+=======
+    # 'django_otp',
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 ]
 
 MIDDLEWARE = [
@@ -165,6 +169,10 @@ SIMPLE_JWT = {
 }
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_SECURE = False 
@@ -173,9 +181,21 @@ SESSION_COOKIE_SECURE = False
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+<<<<<<< HEAD
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your_email@gmail.com' 
 EMAIL_HOST_PASSWORD = 'your_app_password' 
 DEFAULT_FROM_EMAIL = 'your_email@gmail.com'
+=======
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'apikey'  
+EMAIL_HOST_PASSWORD = 'your_sendgrid_api_key' 
+DEFAULT_FROM_EMAIL = 'your_email@example.com'
+
+
+
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
