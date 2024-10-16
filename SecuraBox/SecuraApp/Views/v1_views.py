@@ -31,6 +31,13 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
     
 
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     serializer_class = createPinSerializer 
@@ -66,9 +73,16 @@ class UserLoginViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class SocialmediaViewset(viewsets.ModelViewSet):
+<<<<<<< HEAD
     permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
     queryset = SocialMedia.objects.none()
+=======
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthenticated]
+    serializer_class = SocialmediaSerializer
+    queryset = SocialMedia.objects.all()
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 
     def create(self, request):
         user = request.user
@@ -78,6 +92,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
             serializer.save(user_id = user.id)
             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
         else:
+<<<<<<< HEAD
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
         
 
@@ -89,13 +104,22 @@ class SocialmediaViewset(viewsets.ModelViewSet):
             return Response(serializers.data, status= status.HTTP_200_OK)
         else:
             return Response(serializers.errors, status= status.HTTP_400_BAD_REQUEST)
+=======
+            return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)      
+
+
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 
 
 
 
 class MailViewset(viewsets.ModelViewSet):
     serializer_class = MailSerializer
+<<<<<<< HEAD
     queryset = Mail.objects.none()
+=======
+    queryset = Mail.objects.all()
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 
     def create(self, request):
         user = request.user
@@ -111,7 +135,11 @@ class MailViewset(viewsets.ModelViewSet):
 
 class OnlineBankViewset(viewsets.ModelViewSet):
     serializer_class = OnlineBankSerializer
+<<<<<<< HEAD
     queryset = OnlineBanking.objects.none()
+=======
+    queryset = OnlineBanking.objects.all()
+>>>>>>> 8047e21d9a947add6b494487624c224781b53436
 
     def create(self, request):
         user = request.user
