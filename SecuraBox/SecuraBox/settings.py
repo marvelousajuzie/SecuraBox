@@ -177,11 +177,11 @@ SESSION_COOKIE_SECURE = False
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 'marvelousajuzie12@gmail.com' 
-EMAIL_HOST_PASSWORD = 'nldl rjbm iayq dbvs' 
-DEFAULT_FROM_EMAIL = 'marvelousajuzie12@gmail.com' 
+EMAIL_HOST_PASSWORD = 'xexj ejax gkft ugaj' 
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
