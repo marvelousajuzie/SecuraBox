@@ -9,7 +9,7 @@ from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 
-#  DONE
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -32,12 +32,14 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-# DONE
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email= models.EmailField(unique= True, verbose_name= _('Email Address'))
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
 
     objects = CustomUserManager()
 
