@@ -34,7 +34,20 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+class VerifyOTPViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
 
+    def create(self, request, user_id):
+        user = CustomUser.objects.get(id=user_id)
+        serializer = OTPVerificationSerializer(data=request.data, context={'user': user})
+
+        if serializer.is_valid():
+            user.otp = None
+            user.otp_created_at = None
+            user.save()
+
+            return Response({'message': 'OTP verified successfully!'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
