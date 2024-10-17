@@ -6,6 +6,7 @@ from SecuraApp.Adminviews import *
 
 router = DefaultRouter()
 router.register(r'register',UsersRegisterViewSet, basename='register')
+router.register(r'verifyotp', VerifyOTPViewSet, basename= 'verifyotp')
 router.register(r'userLogin', UserLoginViewset, basename= 'login')
 router.register(r'socialmedia', SocialmediaViewset, basename= 'socials')
 router.register(r'mail', MailViewset, basename= 'mail')
