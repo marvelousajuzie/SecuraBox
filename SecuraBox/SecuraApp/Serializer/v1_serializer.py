@@ -36,8 +36,22 @@ class CustomUserRegisterSerializer(serializers.ModelSerializer):
 
 
 
-class VerifyEmailSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField
+class OTPVerificationSerializer(serializers.Serializer):
+    otp = serializers.CharField(max_length=4, min_length=4)
+
+    def validate(self, attrs):
+        otp = attrs.get('otp')
+        user = self.context['user']
+
+        # Check if OTP matches
+        if user.otp != otp:
+            raise serializers.ValidationError('Invalid OTP')
+
+        # Check if OTP is expired (assuming a 5-minute expiration)
+        if (timezone.now() - user.otp_created_at).total_seconds() > 300:
+            raise serializers.ValidationError('OTP has expired')
+
+        return attrs
 
 
 
