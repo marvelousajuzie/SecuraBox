@@ -19,6 +19,9 @@ router.register(r'note', NoteViewset, basename= 'note')
 router.register(r'document', DocumentViewset, basename= 'document')
 
 
+
+
+
 # Nested router
 register_router = routers.NestedDefaultRouter(router, r'register', lookup = 'register')
 register_router.register(r'pin', createPinView, basename= 'register-pin')
