@@ -46,10 +46,10 @@ class OTPVerificationSerializer(serializers.Serializer):
         user = self.context['user']
         if user.otp != otp:
             raise serializers.ValidationError('Invalid OTP')
-        if not user.otp_created_at:
-            raise serializers.ValidationError('OTP creation time is missing')
+        if not user.otp_expires_at:
+            raise serializers.ValidationError('OTP expiration time is missing')
 
-        if (timezone.now() - user.otp_created_at).total_seconds() > 300:
+        if timezone.now() > user.otp_expires_at:
             raise serializers.ValidationError('OTP has expired')
 
         return attrs
