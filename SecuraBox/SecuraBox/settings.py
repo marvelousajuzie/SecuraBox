@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'SecuraApp',
     'django_cryptography', 
-    # 'django_otp',
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -180,6 +180,10 @@ PASSWORD_HASHERS = [
 
 
 
+# Django settings for HSTS
+SECURE_HSTS_SECONDS = 31536000  
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_SSL_REDIRECT = True
 
 
 
