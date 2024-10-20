@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'SecuraApp',
     'django_cryptography', 
     'axes',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
