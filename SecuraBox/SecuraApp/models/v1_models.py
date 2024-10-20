@@ -40,6 +40,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_created_at = models.DateTimeField(blank=True, null=True)
+    otp_expires_at = models.DateTimeField(blank=True, null=True)
 
     objects = CustomUserManager()
 

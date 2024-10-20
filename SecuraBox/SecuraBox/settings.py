@@ -170,7 +170,7 @@ SIMPLE_JWT = {
 
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # Fallbacks
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
 ]
 
