@@ -45,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',   
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'SecuraBox.urls'
@@ -177,6 +178,10 @@ PASSWORD_HASHERS = [
 
 
 
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesBackend',  # Add the Axes backend
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 
 
@@ -186,6 +191,12 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_SSL_REDIRECT = True
 
 
+
+
+# Django-Axes 
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 5  # Example: block after 5 failed attempts
+AXES_LOCK_OUT_AT_FAILURE = True
 
 
 
