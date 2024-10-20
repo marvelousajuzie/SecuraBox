@@ -1,7 +1,8 @@
 import secrets
 from django.core.mail import send_mail
 from django.conf import settings
-from django.utils import timezone, timedelta
+from django.utils import timezone
+from datetime import timedelta
 from .models import CustomUser
 
 
