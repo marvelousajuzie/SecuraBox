@@ -1,4 +1,3 @@
-from decouple import config
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -47,7 +46,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'SecuraBox.urls'
 
@@ -170,11 +172,17 @@ SIMPLE_JWT = {
 
  # ARGON2 FOR PASSWORD HASHING
 
+# settings.py
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',  
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
+
+
+
 
 
 
@@ -186,11 +194,6 @@ AUTHENTICATION_BACKENDS = [
 
 
 
-# Django settings for HSTS
-SECURE_HSTS_SECONDS = 31536000  
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_SSL_REDIRECT = True
-
 
 
 
@@ -201,15 +204,10 @@ AXES_LOCK_OUT_AT_FAILURE = True
 
 
 
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_NAME = 'sessionid'
-SESSION_COOKIE_SECURE = False 
 
 
 
