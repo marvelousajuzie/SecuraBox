@@ -49,7 +49,18 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:56097',  
+    'http://127.0.0.1:56097',  
+    'http://127.0.0.1:8001', 
+]
+
+
+
+CORS_ALLOW_ALL_ORIGINS = True 
+
+
 
 ROOT_URLCONF = 'SecuraBox.urls'
 
@@ -202,10 +213,6 @@ AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5  # Example: block after 5 failed attempts
 AXES_LOCK_OUT_AT_FAILURE = True
 
-
-
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 
 
 
