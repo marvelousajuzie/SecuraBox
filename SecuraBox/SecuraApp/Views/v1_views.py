@@ -28,8 +28,13 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         if serializer.is_valid(raise_exception= True):
          user = serializer.save()
          send_otp_via_email(serializer.data['email'])
-         return Response(serializer.data,  status= status.HTTP_201_CREATED)
-        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+         refresh = RefreshToken.for_user(user)
+         return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'message': 'Registered Sucessfully An Otp has been sent to your email'
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
