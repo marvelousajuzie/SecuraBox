@@ -7,6 +7,7 @@ from SecuraApp.Adminviews import *
 router = DefaultRouter()
 router.register(r'register',UsersRegisterViewSet, basename='register')
 router.register(r'verifyotp', VerifyOTPViewSet, basename= 'verifyotp')
+router.register(r'pin', createPinView, basename= 'register-pin')
 router.register(r'userLogin', UserLoginViewset, basename= 'login')
 router.register(r'socialmedia', SocialmediaViewset, basename= 'socials')
 router.register(r'mail', MailViewset, basename= 'mail')
@@ -22,9 +23,7 @@ router.register(r'document', DocumentViewset, basename= 'document')
 
 
 
-# Nested router
-register_router = routers.NestedDefaultRouter(router, r'register', lookup = 'register')
-register_router.register(r'pin', createPinView, basename= 'register-pin')
+
 
 
 
@@ -39,7 +38,6 @@ router.register(r'admin-onlinebank',AdminOnlineBankView, basename= 'admin-online
 urlpatterns = [
     
     path('', include(router.urls)),
-    path('', include(register_router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
 
