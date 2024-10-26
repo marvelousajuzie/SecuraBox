@@ -76,6 +76,12 @@ class createPinSerializer(serializers.ModelSerializer):
         pin_instance.set_pin(validated_data['pin'])
         pin_instance.save()
         return pin_instance
+    
+
+    def update(self, instance, validated_data):
+        instance.set_pin(validated_data['pin'])
+        instance.save()
+        return instance
 
        
 
