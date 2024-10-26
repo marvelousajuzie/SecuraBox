@@ -58,9 +58,16 @@ class OTPVerificationSerializer(serializers.Serializer):
     
 
 class createPinSerializer(serializers.ModelSerializer):
+    pin = serializers.CharField(write_only=True, min_length=4, max_length=4)
+
     class Meta:
         model = Pin
-        fields = ['user', 'pin']
+        fields = ['pin']
+
+    def validate_pin(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("PIN must be a 4-digit number.")
+        return value
 
        
 
