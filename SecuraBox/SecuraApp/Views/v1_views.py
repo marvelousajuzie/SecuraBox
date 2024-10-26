@@ -27,7 +27,7 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(data= request.data)
         if serializer.is_valid(raise_exception= True):
          user = serializer.save()
-         send_otp_via_email(serializer.data['email'])
+         send_otp_via_email(serializer.data['email']),
          refresh = RefreshToken.for_user(user)
          return Response({
                 'refresh': str(refresh),
@@ -46,15 +46,11 @@ class VerifyOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
-        user_id = request.data.get('user_id')
-        if not user_id:
-            return Response({'error': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        user = request.user
+        if not user.is_authenticated:
+            return Response({'error': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         serializer = OTPVerificationSerializer(data=request.data, context={'user': user})
-
         if serializer.is_valid():
             user.otp = None
             user.otp_created_at = None

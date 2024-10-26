@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -55,7 +57,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Pin(models.Model):
     user = models.OneToOneField(CustomUser, on_delete= models.CASCADE)
-    pin = EncryptedCharField(max_length= 4, validators=[RegexValidator(r'^\d{4}$', 'PIN must be a 4-digit number.')])
+    pin_hash = models.CharField(max_length=128,  null=True)
+    
+
+    pin_validator = RegexValidator(r'^\d{4}$', 'PIN must be a 4-digit number.')
+
+
+
+    def set_pin(self, raw_pin):
+        self.pin_validator(raw_pin)
+        self.pin_hash = make_password(raw_pin, hasher='argon2')
+
+    def verify_pin(self, raw_pin):
+        return check_password(raw_pin, self.pin_hash)
 
 
     def __str__(self):
