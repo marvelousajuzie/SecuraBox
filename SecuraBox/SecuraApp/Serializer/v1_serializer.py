@@ -68,6 +68,14 @@ class createPinSerializer(serializers.ModelSerializer):
         if not value.isdigit():
             raise serializers.ValidationError("PIN must be a 4-digit number.")
         return value
+    
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        pin_instance, created = Pin.objects.get_or_create(user=user)
+        pin_instance.set_pin(validated_data['pin'])
+        pin_instance.save()
+        return pin_instance
 
        
 
