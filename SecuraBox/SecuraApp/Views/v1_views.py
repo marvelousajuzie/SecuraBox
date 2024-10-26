@@ -61,18 +61,34 @@ class VerifyOTPViewSet(viewsets.ViewSet):
 
 
 class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = createPinSerializer 
     
     def create(self, request, *args, **kwargs):
-        serializer= self.get_serializer(data= request.data)
+        serializer= self.get_serializer(data= request.data, context={'request': request})
         if serializer.is_valid(raise_exception = True):
             serializer.save()
             return Response({'message': 'Pin Set Sucessfully'}, status= status.HTTP_201_CREATED)
-        return Response({'message': 'Authentication required'}, status= status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+class VerifyPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        pin = request.data.get("pin")
+        if not pin:
+            return Response({"error": "PIN is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            pin_instance = Pin.objects.get(user=request.user)
+            if pin_instance.verify_pin(pin):
+                return Response({"message": "PIN verified successfully."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid PIN."}, status=status.HTTP_400_BAD_REQUEST)
+        except Pin.DoesNotExist:
+            return Response({"error": "PIN not set for this user."}, status=status.HTTP_404_NOT_FOUND)
 
 
 # LOGIN ACCOUNT
