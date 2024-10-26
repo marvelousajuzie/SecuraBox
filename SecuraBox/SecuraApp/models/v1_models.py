@@ -57,7 +57,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Pin(models.Model):
     user = models.OneToOneField(CustomUser, on_delete= models.CASCADE)
-    pin_hash = models.CharField(max_length=128,  null=True)
+    pin_hash = models.CharField(max_length=128,  null=False)
     
 
     pin_validator = RegexValidator(r'^\d{4}$', 'PIN must be a 4-digit number.')
