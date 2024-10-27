@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from SecuraApp.Serializer.v1_serializer import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
 from SecuraApp.emails import *
 
 
@@ -73,22 +74,29 @@ class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
-class VerifyPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
+
+class VerifyPinView(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
+    serializer_class = createPinSerializer 
 
-    def post(self, request):
-        pin = request.data.get("pin")
-        if not pin:
-            return Response({"error": "PIN is required."}, status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=False, methods=['post'], url_path='verifypin', url_name='verify-pin')
+    def verify_pin(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            pin = serializer.validated_data.get("pin")
+            
+            try:
+                pin_instance = Pin.objects.get(user=request.user)
+                if pin_instance.verify_pin(pin):
+                    return Response({"message": "PIN verified successfully."}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Invalid PIN."}, status=status.HTTP_400_BAD_REQUEST)
+            except Pin.DoesNotExist:
+                return Response({"error": "PIN not set for this user."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            pin_instance = Pin.objects.get(user=request.user)
-            if pin_instance.verify_pin(pin):
-                return Response({"message": "PIN verified successfully."}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid PIN."}, status=status.HTTP_400_BAD_REQUEST)
-        except Pin.DoesNotExist:
-            return Response({"error": "PIN not set for this user."}, status=status.HTTP_404_NOT_FOUND)
 
 
 # LOGIN ACCOUNT
