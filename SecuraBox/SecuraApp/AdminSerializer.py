@@ -5,10 +5,10 @@ from django.contrib.auth import authenticate
 
 
 
-class AdminSocialmediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminSocialMedia
-        fields = [ 'logo', 'platform_name']
+# class AdminSocialmediaSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = AdminSocialMedia
+#         fields = [ 'logo', 'platform_name']
 
 
 

@@ -31,7 +31,7 @@ router.register(r'document', DocumentViewset, basename= 'document')
 
 
 # ADMIN USERS
-router.register(r'admin-socialmedia', AdminSocialMediaView, basename= 'socialmedia')
+# router.register(r'admin-socialmedia', AdminSocialMediaView, basename= 'socialmedia')
 router.register(r'admin-mail', AdminMailView, basename= 'admin-mail')
 router.register(r'admin-onlinebank',AdminOnlineBankView, basename= 'admin-onlinebank')
 
