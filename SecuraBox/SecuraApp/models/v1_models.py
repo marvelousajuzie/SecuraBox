@@ -86,19 +86,10 @@ class Country(models.Model):
         return self.country_name
     
 
-# ADMIN USER
-class AdminSocialMedia(models.Model):
-    logo = models.ImageField(upload_to='social_medialogos/', default='path/to/default/image.jpg')
-    platform_name = models.CharField(max_length= 200)
-
-
-    def __str__(self):
-        return self.platform_name
 
 
 class SocialMedia(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    adminSocialMedia = models.ForeignKey(AdminSocialMedia, on_delete= models.CASCADE, null=True, blank=True)
     email = models.CharField(max_length= 200, blank= True, null= True)
     phone_number = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{11}$', 'PIN must be a 11-digit number.')], blank= True, null= True)
     password = EncryptedCharField(max_length= 255, validators=[validate_password],blank= False, null=False)

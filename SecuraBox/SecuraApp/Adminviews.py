@@ -14,20 +14,20 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 
-class AdminSocialMediaView(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser]
-    serializer_class = AdminSocialmediaSerializer
-    queryset = AdminSocialMedia.objects.none()
+# class AdminSocialMediaView(viewsets.ModelViewSet):
+#     permission_classes = [IsAdminUser]
+#     serializer_class = AdminSocialmediaSerializer
+#     queryset = AdminSocialMedia.objects.none()
 
-    def create(self, request):
-        user = request.user
-        if user.is_superuser or user.is_staff():
-            serializer = self.serializer_class(data = request.data)
-            serializer.is_valid(raise_exception= True)
-            serializer.save()
-            return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
-        else:
-            return Response({'message': 'not a Staff or superuser'}, status= status.HTTP_400_BAD_REQUEST)
+#     def create(self, request):
+#         user = request.user
+#         if user.is_superuser or user.is_staff():
+#             serializer = self.serializer_class(data = request.data)
+#             serializer.is_valid(raise_exception= True)
+#             serializer.save()
+#             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
+#         else:
+#             return Response({'message': 'not a Staff or superuser'}, status= status.HTTP_400_BAD_REQUEST)
         
 
 
