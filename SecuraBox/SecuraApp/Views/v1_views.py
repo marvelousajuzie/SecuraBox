@@ -150,6 +150,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
 
 
 class MailViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = MailSerializer
     queryset = Mail.objects.all()
 
@@ -169,7 +170,6 @@ class MailViewset(viewsets.ModelViewSet):
 
 class  OnlineBankViewset(viewsets.ModelViewSet):
     serializer_class = OnlineBankSerializer
-
     queryset = OnlineBanking.objects.all()
 
 
@@ -199,6 +199,7 @@ class CreditCardViewset(viewsets.ModelViewSet):
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
         
+
 
 
 class NationalIDViewset(viewsets.ModelViewSet):
