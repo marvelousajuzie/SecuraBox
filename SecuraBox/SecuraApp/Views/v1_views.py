@@ -129,7 +129,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
             serializer = self.serializer_class(data = request.data)
             serializer.is_valid(raise_exception = True)
             serializer.save(user_id = user.id)
-            return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
+            return Response({'message': 'Created Suceessfully'}, status= status.HTTP_200_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
         
