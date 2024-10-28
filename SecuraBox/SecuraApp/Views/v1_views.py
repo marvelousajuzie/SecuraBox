@@ -118,30 +118,31 @@ class UserLoginViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
     
 
 
+
+
 class SocialmediaViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
-    queryset = SocialMedia.objects.none()
+    queryset = SocialMedia.objects.none()  
+
+    def get_queryset(self):
+        return SocialMedia.objects.filter(user=self.request.user)
 
     def create(self, request):
         user = request.user
-        if user.is_authenticated or isinstance(user, CustomUser):
-            serializer = self.serializer_class(data = request.data)
-            serializer.is_valid(raise_exception = True)
-            serializer.save(user_id = user.id)
-            return Response({'message': 'Created Suceessfully'}, status= status.HTTP_200_CREATED)
-        else:
-            return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
-        
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=user) 
+        return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
 
-    def update(self, request, SocialMedia_id):
-        queryset = get_object_or_404(SocialMedia, SocialMedia_id = SocialMedia_id)
-        serializers = self.serializer_class(queryset, data = request.data, partial = True)
-        if serializers.is_valid(raise_exception= True):
-            serializers.save()
-            return Response(serializers.data, status= status.HTTP_200_OK)
-        else:
-            return Response(serializers.errors, status= status.HTTP_400_BAD_REQUEST)
+    def update(self, request, pk=None):
+        instance = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
+        serializer = self.serializer_class(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 
 
