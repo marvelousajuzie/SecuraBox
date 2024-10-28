@@ -123,6 +123,11 @@ class SocialmediaSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         instance.set_password(password)
         return instance
+    
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            instance.set_password(validated_data.pop('password'))
+        return super().update(instance, validated_data)
         
 
 
