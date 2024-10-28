@@ -130,17 +130,22 @@ class SocialmediaViewset(viewsets.ModelViewSet):
 
     def create(self, request):
         user = request.user
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(user=user) 
-        return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
+        if user.is_authenticated or isinstance(user, CustomUser):
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user_id=user.id) 
+            return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
+        
 
-    def update(self, request, pk=None):
-        instance = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
-        serializer = self.serializer_class(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def update(self, request, pk=None,  partial=True):
+        social_media = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
+        serializer = self.serializer_class(social_media, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
