@@ -97,6 +97,12 @@ class SocialMedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    def save(self, *args, **kwargs):
+        if not self.password.startswith('argon2$'):
+            self.password = make_password(self.password, hasher='argon2')
+        super().save(*args, **kwargs)
+
     
     def __str__(self):
         return self.email or 'No Email'
