@@ -160,7 +160,36 @@ class OnlineBankSerializer(serializers.ModelSerializer):
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = ['bank_name', 'card_number','cardholder_name','expiration_date', 'cvv']
+        fields = ['id', 'user', 'card_number', 'cardholder_name', 'expiration_date', 'cvv', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'cvv': {'write_only': True},  
+            'card_number': {'write_only': True},  
+        }
+
+    def create(self, validated_data):
+        card_number = validated_data.pop('card_number')
+        cvv = validated_data.pop('cvv')
+
+        credit_card = CreditCard(**validated_data)
+        credit_card.set_card_number(card_number)
+        credit_card.set_cvv(cvv)
+        credit_card.save()
+        return credit_card
+
+    def update(self, instance, validated_data):
+        if 'card_number' in validated_data:
+            card_number = validated_data.pop('card_number')
+            instance.set_card_number(card_number)
+
+        if 'cvv' in validated_data:
+            cvv = validated_data.pop('cvv')
+            instance.set_cvv(cvv)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 
