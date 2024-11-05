@@ -173,12 +173,17 @@ class CreditCard(models.Model):
 
     
     def set_card_number(self, raw_card_number):
-        self.password = make_password(raw_card_number, hasher='argon2')
+        self.card_number = make_password(raw_card_number, hasher='argon2')
         self.save(update_fields=["card_number"])
 
+    def set_cvv(self, raw_cvv):
+        self.cvv = make_password(raw_cvv, hasher = 'argon2')
+        self.save(update_fields=["cvv"])
 
-    def ___str__(self):
-        return f"{self.cardholder_name} - {self.cardholder_name}"
+
+
+    def __str__(self):
+        return f"{self.cardholder_name} - **** **** **** {self.card_number[-4:]}"
 
 
 
@@ -214,17 +219,12 @@ class DriversLicense(models.Model):
 
 class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    issuing_Organization = models.CharField(max_length= 300)
-    certificateID = EncryptedCharField(max_length=50, unique=True)
     certificate_name = models.CharField(max_length= 200)
-    certificate_url = models.URLField(blank= True, null=True)
-    issue_date = models.DateField(null= True, blank= True)
-    issued_by = models.CharField(max_length=100, null= True, blank= True)
-    document = models.FileField(upload_to='certificates/', blank=True, null=True)
+    certificate_document = models.FileField(upload_to='certificates/', blank=True, null=True)
 
 
     def __str__(self):
-        return self.issuing_Organization
+        return self.certificate_name
 
 
 
