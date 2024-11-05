@@ -107,27 +107,25 @@ class SocialMedia(models.Model):
         return self.email or 'No Email'
     
 
-# ADMIN USER
-class AdminMail(models.Model):
-    logo = models.ImageField(upload_to='mail_logos/',default='path/to/default/image.jpg')
-    mail_name = models.CharField(max_length= 200)
 
-
-    def __str__(self):
-        return self.mail_name
-    
 
 
 
 class Mail(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    adminMail = models.ForeignKey(AdminMail, on_delete= models.CASCADE, blank = True, null= True)
     email = models.CharField(max_length= 200,  blank= True, null= True)
     phone_number = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{11}$', 'PIN must be a 11-digit number.')], blank = True, null= True)
-    password = EncryptedCharField(max_length= 255, validators=[validate_password])
+    password = models.CharField(max_length=255, blank= True, null=True)
     mail_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password, hasher='argon2')
+        self.save(update_fields=["password"])
+
     
     def __str__(self):
         return self.email
