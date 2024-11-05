@@ -170,6 +170,15 @@ class MailViewset(viewsets.ModelViewSet):
             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
+        
+        
+    def update(self, request, pk=None,  partial=True):
+        social_media = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
+        serializer = self.serializer_class(social_media, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 
