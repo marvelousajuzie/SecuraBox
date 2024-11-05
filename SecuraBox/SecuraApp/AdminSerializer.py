@@ -12,10 +12,10 @@ from django.contrib.auth import authenticate
 
 
 
-class AdminMailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdminMail
-        fields = ['logo', 'mail_name']
+# class AdminMailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = AdminMail
+#         fields = ['logo', 'mail_name']
 
 
 class AdminOnlineBankSerializer(serializers.ModelSerializer):
