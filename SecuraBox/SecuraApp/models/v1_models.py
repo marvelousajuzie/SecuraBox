@@ -163,8 +163,7 @@ class OnlineBanking(models.Model):
 
 class CreditCard(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    bank_name = models.CharField(max_length=150, null=True, blank= True)
-    card_number = EncryptedCharField(max_length= 16, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
+    card_number = models.CharField(max_length= 16, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
     cardholder_name = models.CharField(max_length = 150, blank= True, null = True)
     expiration_date = models.DateTimeField(null= True, blank= True)
     cvv = EncryptedCharField(max_length=3, validators=[RegexValidator(r'^\d{3}$', 'PIN must be a 3-digit number.')], blank= True, null = True)
@@ -172,8 +171,14 @@ class CreditCard(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
 
 
+    
+    def set_card_number(self, raw_card_number):
+        self.password = make_password(raw_card_number, hasher='argon2')
+        self.save(update_fields=["card_number"])
+
+
     def ___str__(self):
-        return f"{self.cardholder_name} - {self.bank_name}"
+        return f"{self.cardholder_name} - {self.cardholder_name}"
 
 
 
