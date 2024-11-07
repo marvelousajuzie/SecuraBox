@@ -171,7 +171,7 @@ class MailViewset(viewsets.ModelViewSet):
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
         
-        
+
     def update(self, request, pk=None,  partial=True):
         social_media = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
         serializer = self.serializer_class(social_media, data=request.data, partial=partial)
@@ -201,6 +201,7 @@ class  OnlineBankViewset(viewsets.ModelViewSet):
 
 
 class CreditCardViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = CreditCardSerializer
     queryset = CreditCard.objects.all()
 
@@ -250,6 +251,7 @@ class DriverLicenseViewset(viewsets.ModelViewSet):
             
 
 class CertificateViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = CertificateSerializer
     queryset = Certificates.objects.all()
 
