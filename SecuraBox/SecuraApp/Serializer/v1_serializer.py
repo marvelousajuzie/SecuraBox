@@ -166,30 +166,30 @@ class CreditCardSerializer(serializers.ModelSerializer):
             'card_number': {'write_only': True},  
         }
 
-    def create(self, validated_data):
-        card_number = validated_data.pop('card_number')
-        cvv = validated_data.pop('cvv')
+    # def create(self, validated_data):
+    #     card_number = validated_data.pop('card_number')
+    #     cvv = validated_data.pop('cvv')
 
-        credit_card = CreditCard(**validated_data)
-        credit_card.set_card_number(card_number)
-        credit_card.set_cvv(cvv)
-        credit_card.save()
-        return credit_card
+    #     credit_card = CreditCard(**validated_data)
+    #     credit_card.set_card_number(card_number)
+    #     credit_card.set_cvv(cvv)
+    #     credit_card.save()
+    #     return credit_card
 
-    def update(self, instance, validated_data):
-        if 'card_number' in validated_data:
-            card_number = validated_data.pop('card_number')
-            instance.set_card_number(card_number)
+    # def update(self, instance, validated_data):
+    #     if 'card_number' in validated_data:
+    #         card_number = validated_data.pop('card_number')
+    #         instance.set_card_number(card_number)
 
-        if 'cvv' in validated_data:
-            cvv = validated_data.pop('cvv')
-            instance.set_cvv(cvv)
+    #     if 'cvv' in validated_data:
+    #         cvv = validated_data.pop('cvv')
+    #         instance.set_cvv(cvv)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+    #     for attr, value in validated_data.items():
+    #         setattr(instance, attr, value)
 
-        instance.save()
-        return instance
+    #     instance.save()
+    #     return instance
 
 
 
@@ -216,7 +216,7 @@ class DriversLicenseSerializer(serializers.ModelSerializer):
 class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificates
-        fields = ['issuing_Organization', 'certificateID', 'certificate_name', 'certificate_url', 'issue_date', 'issued_by', 'document']
+        fields = [  'certificate_name', 'certificate_document']
 
 
 

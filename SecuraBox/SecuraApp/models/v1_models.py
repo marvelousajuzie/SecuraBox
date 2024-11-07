@@ -167,6 +167,11 @@ class CreditCard(models.Model):
     cardholder_name = models.CharField(max_length = 150, blank= True, null = True)
     expiration_date = models.DateTimeField(null= True, blank= True)
     cvv = EncryptedCharField(max_length=3, validators=[RegexValidator(r'^\d{3}$', 'PIN must be a 3-digit number.')], blank= True, null = True)
+    color = models.CharField(
+        max_length=7, 
+        default='#FF1100', 
+        validators=[RegexValidator(r'^#([A-Fa-f0-9]{6})$', 'Color must be a valid hex code.')],
+        help_text="Card color in hex format (e.g., #FF1100 for red).")
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now= True)
 
@@ -241,7 +246,7 @@ class Notes(models.Model):
 
 
 class Document(models.Model):
-    title = models.CharField(max_length= 150)
+    title = models.CharField(max_length= 150, null= True, blank= True)
     description = models.TextField(null= True, blank= True)
     file = models.FileField(upload_to='documents/')
     updated_at = models.DateTimeField()
