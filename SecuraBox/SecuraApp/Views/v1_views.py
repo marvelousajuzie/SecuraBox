@@ -29,12 +29,7 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         if serializer.is_valid(raise_exception= True):
          user = serializer.save()
          send_otp_via_email(serializer.data['email']),
-         refresh = RefreshToken.for_user(user)
-         return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'message': 'Registered Sucessfully An Otp has been sent to your email'
-            }, status=status.HTTP_200_OK)
+         return Response({ 'message': 'Registered Sucessfully An Otp has been sent to your email'}, status=status.HTTP_200_OK)
         return Response({'message': 'User already exists. Please Log In'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -43,21 +38,48 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+# VERIFY OTP FOR  LOGIN ACCOUNT
 class VerifyOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
-        user = request.user
-        if not user.is_authenticated:
-            return Response({'error': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        serializer = OTPVerificationSerializer(data=request.data, context={'user': user})
-        if serializer.is_valid():
-            user.otp = None
-            user.otp_created_at = None
-            user.save()
-            return Response({'message': 'OTP verified successfully!'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        purpose = request.data.get('purpose')
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            if user.otp == otp and user.otp_expires_at > timezone.now():
+                if purpose == 'register':
+                     user.is_active = True
+                     user.otp = None
+                     user.otp_expires_at = None
+                     user.save()
+                     refresh = RefreshToken.for_user(user)
+                     return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    'message': 'Registration successful. OTP verified'
+                    }, status=status.HTTP_200_OK)
+                
+                elif purpose == 'login':
+                    refresh = RefreshToken.for_user(user)
+                    user.otp = None
+                    user.otp_expires_at = None
+                    user.save()
+                    return Response({
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                        'message': 'OTP verified successfully. Logged in.'
+                        }, status=status.HTTP_200_OK)
+                else:
+                    return Response({'message': 'Invalid purpose specified.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'message': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        except CustomUser.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 
@@ -100,21 +122,26 @@ class VerifyPinView(viewsets.GenericViewSet):
 
 
 # LOGIN ACCOUNT
-class UserLoginViewset(mixins.CreateModelMixin, viewsets.GenericViewSet):
+class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     serializer_class = CustomuserLoginSerialzer
 
     def create(self, request):
-        serializer = self.serializer_class(data = request.data)
-        if serializer.is_valid(raise_exception= True):
-           user = serializer.validated_data['user']
-           refresh = RefreshToken.for_user(user)
-           return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'message': 'Logged in successfully'
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.validated_data['user']
+            send_otp_via_email(user.email)
+            return Response({
+                'message': 'OTP sent to your email for verification. Please enter OTP to complete login.'
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
     
 
 
