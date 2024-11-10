@@ -100,7 +100,8 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
         password = attrs.get('password')
         
         if email and password:
-            user = authenticate(username=email, password= password)
+            request = self.context.get('request')
+            user = authenticate(request=request, username=email, password= password)
 
             if not user:
                 raise serializers.ValidationError('Invalid Credidentials')
@@ -166,30 +167,28 @@ class CreditCardSerializer(serializers.ModelSerializer):
             'card_number': {'write_only': True},  
         }
 
-    # def create(self, validated_data):
-    #     card_number = validated_data.pop('card_number')
-    #     cvv = validated_data.pop('cvv')
+    def create(self, validated_data):
+        card_number = validated_data.pop('card_number')
+        cvv = validated_data.pop('cvv')
+        instance = CreditCard.objects.create(**validated_data)
 
-    #     credit_card = CreditCard(**validated_data)
-    #     credit_card.set_card_number(card_number)
-    #     credit_card.set_cvv(cvv)
-    #     credit_card.save()
-    #     return credit_card
+       
+        instance.set_card_number(card_number)
+        instance.set_cvv(cvv)
 
-    # def update(self, instance, validated_data):
-    #     if 'card_number' in validated_data:
-    #         card_number = validated_data.pop('card_number')
-    #         instance.set_card_number(card_number)
+        return instance
 
-    #     if 'cvv' in validated_data:
-    #         cvv = validated_data.pop('cvv')
-    #         instance.set_cvv(cvv)
+    def update(self, instance, validated_data):
+        card_number = validated_data.get('card_number', None)
+        cvv = validated_data.get('cvv', None)
 
-    #     for attr, value in validated_data.items():
-    #         setattr(instance, attr, value)
+        if card_number:
+            instance.set_card_number(card_number)
 
-    #     instance.save()
-    #     return instance
+        if cvv:
+            instance.set_cvv(cvv)
+
+        return super().update(instance, validated_data)
 
 
 
@@ -217,6 +216,11 @@ class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificates
         fields = [  'certificate_name', 'certificate_document']
+
+    def validate_certificate_document(self, value):
+        if value and not value.name.lower().endswith(('pdf', 'jpg', 'jpeg', 'png')):
+            raise serializers.ValidationError("Only image files are allowed.")
+        return value
 
 
 

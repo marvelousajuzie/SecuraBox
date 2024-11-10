@@ -163,7 +163,7 @@ class OnlineBanking(models.Model):
 
 class CreditCard(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    card_number = models.CharField(max_length= 16, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
+    card_number = models.CharField(max_length=128, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
     cardholder_name = models.CharField(max_length = 150, blank= True, null = True)
     expiration_date = models.DateTimeField(null= True, blank= True)
     cvv = EncryptedCharField(max_length=3, validators=[RegexValidator(r'^\d{3}$', 'PIN must be a 3-digit number.')], blank= True, null = True)
@@ -224,8 +224,8 @@ class DriversLicense(models.Model):
 
 class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    certificate_name = models.CharField(max_length= 200)
-    certificate_document = models.FileField(upload_to='certificates/', blank=True, null=True)
+    certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
+    certificate_document = models.FileField(upload_to='certificates/',  blank=True, null=True)
 
 
     def __str__(self):

@@ -63,10 +63,10 @@ class VerifyOTPViewSet(viewsets.ViewSet):
                     }, status=status.HTTP_200_OK)
                 
                 elif purpose == 'login':
-                    refresh = RefreshToken.for_user(user)
                     user.otp = None
                     user.otp_expires_at = None
                     user.save()
+                    refresh = RefreshToken.for_user(user)
                     return Response({
                         'refresh': str(refresh),
                         'access': str(refresh.access_token),
@@ -127,7 +127,7 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = CustomuserLoginSerialzer
 
     def create(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
             send_otp_via_email(user.email)
@@ -230,14 +230,18 @@ class  OnlineBankViewset(viewsets.ModelViewSet):
 class CreditCardViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CreditCardSerializer
-    queryset = CreditCard.objects.all()
+    queryset = CreditCard.objects.none()
+
+    def get_queryset(self):
+        return SocialMedia.objects.filter(user=self.request.user)
+        
 
     def create(self, request):
         user = request.user
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save(user = user)
+            serializers.save(user_id=user.id)
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
@@ -280,14 +284,17 @@ class DriverLicenseViewset(viewsets.ModelViewSet):
 class CertificateViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CertificateSerializer
-    queryset = Certificates.objects.all()
+    queryset = Certificates.objects.none()
+
+    def get_queryset(self):
+        return Certificates.objects.filter(user=self.request.user)
 
     def create(self, request):
         user = self.request.user
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save(user = user)
+            serializers.save(user_id=user.id)
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
