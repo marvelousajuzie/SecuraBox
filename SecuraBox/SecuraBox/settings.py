@@ -184,7 +184,7 @@ SIMPLE_JWT = {
 
  # ARGON2 FOR PASSWORD HASHING
 
-# settings.py
+
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
@@ -211,7 +211,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Django-Axes 
 AXES_ENABLED = True
-AXES_FAILURE_LIMIT = 5  # Example: block after 5 failed attempts
+AXES_FAILURE_LIMIT = 5  
 AXES_LOCK_OUT_AT_FAILURE = True
 
 
