@@ -59,7 +59,7 @@ class VerifyOTPViewSet(viewsets.ViewSet):
                      return Response({
                     'refresh': str(refresh),
                     'access': str(refresh.access_token),
-                    'message': 'Registration successful. OTP verified'
+                    'message': 'OTP verified successfully!'
                     }, status=status.HTTP_200_OK)
                 
                 elif purpose == 'login':
@@ -70,7 +70,7 @@ class VerifyOTPViewSet(viewsets.ViewSet):
                     return Response({
                         'refresh': str(refresh),
                         'access': str(refresh.access_token),
-                        'message': 'OTP verified successfully. Logged in.'
+                        'message': 'OTP verified successfully!'
                         }, status=status.HTTP_200_OK)
                 else:
                     return Response({'message': 'Invalid purpose specified.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -150,7 +150,7 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 class SocialmediaViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
-    queryset = SocialMedia.objects.none()  
+    queryset = SocialMedia.objects.none()
 
     def get_queryset(self):
         return SocialMedia.objects.filter(user=self.request.user)
@@ -160,7 +160,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
         if user.is_authenticated or isinstance(user, CustomUser):
             serializer = self.serializer_class(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(user_id=user.id) 
+            serializer.save(user_id = user.id) 
             return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
@@ -233,7 +233,7 @@ class CreditCardViewset(viewsets.ModelViewSet):
     queryset = CreditCard.objects.none()
 
     def get_queryset(self):
-        return SocialMedia.objects.filter(user=self.request.user)
+        return CreditCard.objects.filter(user=self.request.user)
         
 
     def create(self, request):
