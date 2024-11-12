@@ -119,16 +119,7 @@ class SocialmediaSerializer(serializers.ModelSerializer):
         model = SocialMedia
         fields = [ 'email', 'phone_number', 'password', 'profile_url']
 
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        instance = super().create(validated_data)
-        instance.set_password(password)
-        return instance
-    
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            instance.set_password(validated_data.pop('password'))
-        return super().update(instance, validated_data)
+
         
 
 

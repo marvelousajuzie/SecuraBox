@@ -148,22 +148,22 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class SocialmediaViewset(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
-    queryset = SocialMedia.objects.none()
+    queryset = SocialMedia.objects.all()
 
-    def get_queryset(self):
-        return SocialMedia.objects.filter(user=self.request.user)
+    # def get_queryset(self):
+    #     return SocialMedia.objects.filter(user=self.request.user)
 
-    def create(self, request):
-        user = request.user
-        if user.is_authenticated or isinstance(user, CustomUser):
-            serializer = self.serializer_class(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user_id = user.id) 
-            return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
+    # def create(self, request):
+    #     # user = request.user
+    #     # if user.is_authenticated or isinstance(user, CustomUser):
+    #         serializer = self.serializer_class(data=request.data)
+    #         serializer.is_valid(raise_exception=True)
+    #         serializer.save() 
+    #         return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
+    #     # else:
+    #     #     return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
         
 
     def update(self, request, pk=None,  partial=True):
@@ -193,7 +193,7 @@ class MailViewset(viewsets.ModelViewSet):
         if user.is_authenticated or isinstance(user, CustomUser):
             serializer = self.serializer_class(data = request.data)
             serializer.is_valid(raise_exception = True)
-            serializer.save(user_id = user.id)
+            serializer.save()
             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
