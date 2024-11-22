@@ -148,22 +148,22 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class SocialmediaViewset(viewsets.ModelViewSet):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
-    queryset = SocialMedia.objects.all()
+    queryset = SocialMedia.objects.none()
 
-    # def get_queryset(self):
-    #     return SocialMedia.objects.filter(user=self.request.user)
+    def get_queryset(self):
+        return SocialMedia.objects.filter(user=self.request.user)
 
-    # def create(self, request):
-    #     # user = request.user
-    #     # if user.is_authenticated or isinstance(user, CustomUser):
-    #         serializer = self.serializer_class(data=request.data)
-    #         serializer.is_valid(raise_exception=True)
-    #         serializer.save() 
-    #         return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
-    #     # else:
-    #     #     return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request):
+        user = request.user
+        if user.is_authenticated or isinstance(user, CustomUser):
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user_id=user.id) 
+            return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
         
 
     def update(self, request, pk=None,  partial=True):
@@ -185,7 +185,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
 class MailViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = MailSerializer
-    queryset = Mail.objects.all()
+    queryset = Mail.objects.none()
 
 
     def create(self, request):
@@ -193,15 +193,15 @@ class MailViewset(viewsets.ModelViewSet):
         if user.is_authenticated or isinstance(user, CustomUser):
             serializer = self.serializer_class(data = request.data)
             serializer.is_valid(raise_exception = True)
-            serializer.save()
+            serializer.save(user_id=user.id)
             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
         
 
     def update(self, request, pk=None,  partial=True):
-        social_media = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
-        serializer = self.serializer_class(social_media, data=request.data, partial=partial)
+        mail = get_object_or_404(Mail, pk=pk, user=request.user) 
+        serializer = self.serializer_class(mail, data=request.data, partial=partial)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -242,9 +242,18 @@ class CreditCardViewset(viewsets.ModelViewSet):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
             serializers.save(user_id=user.id)
-            return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
+            return Response({'message': 'Created Sucessfully'}, status= status.HTTP_200_OK)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
+        
+
+    def update(self, request, pk=None,  partial=True):
+        card = get_object_or_404(CreditCard, pk=pk, user=request.user) 
+        serializer = self.serializer_class(card, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
 
@@ -294,39 +303,68 @@ class CertificateViewset(viewsets.ModelViewSet):
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save(user_id=user.id)
+            serializers.save()
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
 
 class NoteViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = NoteSerializer
-    queryset = Notes.objects.all()
+    queryset = Notes.objects.none()
+
+    def get_queryset(self):
+        return Notes.objects.filter(user=self.request.user)
 
     def create(self, request):
         user = self.request.user
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save(user = user)
+            serializers.save(user_id=user.id)
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
 
+    def update(self, request, pk=None,  partial=True):
+        notes = get_object_or_404(Notes, pk=pk, user=request.user) 
+        serializer = self.serializer_class(notes, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        
+
 
 class DocumentViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = DocumentSerializer
-    queryset = Document.objects.all()
+    queryset = Document.objects.none()
+
+
+    def get_queryset(self):
+        return Notes.objects.filter(user=self.request.user)
 
     def create(self, request):
         user = self.request.user
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save(user = user)
+            serializers.save(user_id=user.id)
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
+
+
+
+    def update(self, request, pk=None,  partial=True):
+        document = get_object_or_404(Document, pk=pk, user=request.user) 
+        serializer = self.serializer_class(document, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         

@@ -117,7 +117,7 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
 class SocialmediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialMedia
-        fields = [ 'email', 'phone_number', 'password', 'profile_url']
+        fields = [ 'id', 'email', 'phone_number', 'password', 'profile_url']
 
 
         
@@ -126,7 +126,7 @@ class SocialmediaSerializer(serializers.ModelSerializer):
 class MailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mail
-        fields = ['email', 'phone_number', 'password', 'mail_url']
+        fields = [ 'id','email', 'phone_number', 'password', 'mail_url']
 
 
     def create(self, validated_data):
@@ -142,44 +142,36 @@ class MailSerializer(serializers.ModelSerializer):
 
 
 
-class OnlineBankSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OnlineBanking
-        fields = ['account_number', 'phone_number', 'password']
-
 
 
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = ['id', 'user', 'card_number', 'cardholder_name', 'expiration_date', 'cvv', 'created_at', 'updated_at']
-        extra_kwargs = {
-            'cvv': {'write_only': True},  
-            'card_number': {'write_only': True},  
-        }
+        fields = ['id', 'card_number', 'cardholder_name', 'color', 'expiration_date', 'cvv',]
 
     def create(self, validated_data):
-        card_number = validated_data.pop('card_number')
-        cvv = validated_data.pop('cvv')
-        instance = CreditCard.objects.create(**validated_data)
+        return CreditCard.objects.create(**validated_data)
+    
 
-       
-        instance.set_card_number(card_number)
-        instance.set_cvv(cvv)
 
-        return instance
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notes
+        fields = [ 'id','title', 'content']
+    
 
-    def update(self, instance, validated_data):
-        card_number = validated_data.get('card_number', None)
-        cvv = validated_data.get('cvv', None)
 
-        if card_number:
-            instance.set_card_number(card_number)
 
-        if cvv:
-            instance.set_cvv(cvv)
 
-        return super().update(instance, validated_data)
+
+class OnlineBankSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OnlineBanking
+        fields = [ 'id', 'account_number', 'phone_number', 'password']
+
+
+
+
 
 
 
@@ -215,14 +207,10 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 
 
-class NoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notes
-        fields = ['title', 'content']
 
 
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
-        fields = ['title', 'description', 'file']
+        fields =  [ 'id', 'title', 'description', 'file']

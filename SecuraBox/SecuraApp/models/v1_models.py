@@ -89,7 +89,7 @@ class Country(models.Model):
 
 
 class SocialMedia(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete= models.CASCADE, blank= True, null=True)
+    user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
     email = models.CharField(max_length= 200, blank= True, null= True)
     phone_number = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{11}$', 'PIN must be a 11-digit number.')], blank= True, null= True)
     password = EncryptedCharField(max_length=255, blank= True, null=True)
@@ -152,28 +152,14 @@ class OnlineBanking(models.Model):
 
 class CreditCard(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    card_number = models.CharField(max_length=128, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
+    card_number = EncryptedCharField(max_length=128, validators=[RegexValidator(r'^\d{16}$', 'PIN must be a 16-digit number.')])
     cardholder_name = models.CharField(max_length = 150, blank= True, null = True)
-    expiration_date = models.DateTimeField(null= True, blank= True)
+    expiration_date = models.CharField(max_length=7,  null=True, blank=True, validators=[ RegexValidator( regex=r'^\d{2}-\d{4}$', message='Enter a valid month and year in the format MM-YYYY' )])
     cvv = EncryptedCharField(max_length=3, validators=[RegexValidator(r'^\d{3}$', 'PIN must be a 3-digit number.')], blank= True, null = True)
-    color = models.CharField(
-        max_length=7, 
-        default='#FF1100', 
-        validators=[RegexValidator(r'^#([A-Fa-f0-9]{6})$', 'Color must be a valid hex code.')],
-        help_text="Card color in hex format (e.g., #FF1100 for red).")
+    color = models.CharField( max_length=50,
+        help_text="Card color in hex format (e.g., #FF1100 for red).", blank= True, null = True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now= True)
-
-
-    
-    def set_card_number(self, raw_card_number):
-        self.card_number = make_password(raw_card_number, hasher='argon2')
-        self.save(update_fields=["card_number"])
-
-    def set_cvv(self, raw_cvv):
-        self.cvv = make_password(raw_cvv, hasher = 'argon2')
-        self.save(update_fields=["cvv"])
-
 
 
     def __str__(self):
@@ -214,7 +200,9 @@ class DriversLicense(models.Model):
 class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
-    certificate_document = models.FileField(upload_to='certificates/',  blank=True, null=True)
+    certificate_document = models.FileField(upload_to='certificates/', null=True, blank=True)
+
+
 
 
     def __str__(self):
@@ -235,6 +223,7 @@ class Notes(models.Model):
 
 
 class Document(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
     title = models.CharField(max_length= 150, null= True, blank= True)
     description = models.TextField(null= True, blank= True)
     file = models.FileField(upload_to='documents/')
