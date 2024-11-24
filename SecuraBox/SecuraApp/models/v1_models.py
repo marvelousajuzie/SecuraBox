@@ -8,6 +8,7 @@ from django.core.validators import MinLengthValidator, MaxLengthValidator
 from encrypted_model_fields.fields import EncryptedCharField
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -135,15 +136,14 @@ class AdminOnlineBank(models.Model):
 
 class OnlineBanking(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    adminOnlineBank = models.ForeignKey(AdminOnlineBank, on_delete= models.CASCADE,  blank = True, null= True)
-    account_number = EncryptedCharField(max_length= 50)
-    phone_number = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{11}$', 'PIN must be a 11-digit number.')])
+    username = models.CharField(max_length= 300)
     password = EncryptedCharField(max_length= 255, validators=[validate_password], default= '')
+    bankname = models.CharField(max_length= 250)
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.account_number
+        return self.username
     
 
 
@@ -183,17 +183,7 @@ class NationalID(models.Model):
     auto_now_add=True
 
 
-class DriversLicense(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    license_number = EncryptedCharField(max_length=50, unique=True)
-    id_name = models.CharField(max_length= 100, blank= True, null= True)
-    country = models.CharField(max_length=100, blank= True, null= True)
-    issue_date = models.DateField(null= True, blank= True)
-    expiration_date = models.DateField(null= True, blank= True)
-    document = models.FileField(upload_to='certificates/', blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.license_number} - {self.country}"
     
 
 
@@ -227,7 +217,8 @@ class Document(models.Model):
     title = models.CharField(max_length= 150, null= True, blank= True)
     description = models.TextField(null= True, blank= True)
     file = models.FileField(upload_to='documents/')
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
     def __str__(self):

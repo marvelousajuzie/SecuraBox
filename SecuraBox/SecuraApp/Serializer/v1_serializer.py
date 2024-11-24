@@ -186,15 +186,6 @@ class  NationalIDSerializer(serializers.ModelSerializer):
 
 
 
-
-class DriversLicenseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DriversLicense
-        fields = ['license_number', 'id_name', 'country','expiration_date', 'document']
-
-
-
-
 class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificates
