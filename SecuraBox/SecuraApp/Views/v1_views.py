@@ -272,21 +272,6 @@ class NationalIDViewset(viewsets.ModelViewSet):
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
-
-
-class DriverLicenseViewset(viewsets.ModelViewSet):
-    serializer_class = DriversLicenseSerializer
-    queryset = DriversLicense.objects.all()
-
-    def create(self, request):
-        user = request.user
-        if user.is_authenticated or isinstance(user, CustomUser):
-            serializers = self.serializer_class(data = request.data)
-            serializers.is_valid(raise_exception= True)
-            serializers.save(user = user)
-            return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
-        else:
-            return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
             
 
