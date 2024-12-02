@@ -216,6 +216,7 @@ AXES_LOCK_OUT_AT_FAILURE = True
 
 
 
+APPEND_SLASH = False
 
 
 

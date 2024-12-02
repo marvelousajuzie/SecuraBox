@@ -136,9 +136,9 @@ class AdminOnlineBank(models.Model):
 
 class OnlineBanking(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
-    username = models.CharField(max_length= 300)
-    password = EncryptedCharField(max_length= 255, validators=[validate_password], default= '')
-    bankname = models.CharField(max_length= 250)
+    username = models.CharField(max_length= 300, blank= True, null = True)
+    password = EncryptedCharField(max_length= 255, blank= True, null = True)
+    bankname = models.CharField(max_length= 250, blank= True, null = True)
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
     
