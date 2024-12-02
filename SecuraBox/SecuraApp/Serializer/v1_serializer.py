@@ -113,6 +113,39 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
     
 
 
+class PasswordResetSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        old_password = attrs.get('old_password')
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+
+ 
+        if not check_password(old_password, user.password):
+            raise serializers.ValidationError({"old_password": "Old password is incorrect."})
+        if new_password != confirm_password:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+
+
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as e:
+            raise serializers.ValidationError({"new_password": e.messages})
+
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        new_password = self.validated_data['new_password']
+        user.password = make_password(new_password)
+        user.save()
+        return user
+
+
 
 class SocialmediaSerializer(serializers.ModelSerializer):
     class Meta:
