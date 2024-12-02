@@ -151,6 +151,17 @@ class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = PinResetSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "PIN updated successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
     
 
