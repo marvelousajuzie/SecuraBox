@@ -147,6 +147,36 @@ class PasswordResetSerializer(serializers.Serializer):
 
 
 
+
+
+class PinResetSerializer(serializers.Serializer):
+    old_pin = serializers.CharField(write_only=True, max_length=4)
+    new_pin = serializers.CharField(write_only=True, max_length=4)
+    confirm_pin = serializers.CharField(write_only=True, max_length=4)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        old_pin = attrs.get('old_pin')
+        new_pin = attrs.get('new_pin')
+        confirm_pin = attrs.get('confirm_pin')
+        if user.otp != old_pin:
+            raise serializers.ValidationError({"old_pin": "Old PIN is incorrect."})
+        if new_pin != confirm_pin:
+            raise serializers.ValidationError({"confirm_pin": "New PIN and confirmation PIN do not match."})
+
+        if not new_pin.isdigit() or len(new_pin) != 4:
+            raise serializers.ValidationError({"new_pin": "PIN must be a 4-digit numeric value."})
+
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.otp = self.validated_data['new_pin']
+        user.save()
+        return user
+
+
+
 class SocialmediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialMedia
