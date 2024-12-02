@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework import generics
+from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from SecuraApp.models.v1_models import *
 from rest_framework.response import Response
@@ -138,6 +139,15 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
