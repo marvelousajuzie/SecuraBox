@@ -167,7 +167,7 @@ class NoteSerializer(serializers.ModelSerializer):
 class OnlineBankSerializer(serializers.ModelSerializer):
     class Meta:
         model = OnlineBanking
-        fields = [ 'id', 'account_number', 'phone_number', 'password']
+        fields = [ 'id', 'username', 'password', 'bankname']
 
 
 

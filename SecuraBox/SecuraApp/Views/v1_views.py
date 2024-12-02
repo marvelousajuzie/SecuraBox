@@ -211,9 +211,13 @@ class MailViewset(viewsets.ModelViewSet):
 
 
 class  OnlineBankViewset(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = OnlineBankSerializer
-    queryset = OnlineBanking.objects.all()
+    queryset = OnlineBanking.objects.none()
 
+
+    def get_queryset(self):
+        return OnlineBanking.objects.filter(user=self.request.user)
 
     def create(self, request):
         user = request.user
@@ -224,6 +228,16 @@ class  OnlineBankViewset(viewsets.ModelViewSet):
             return Response({'message': 'Created Suceessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'not a valid user'}, status= status.HTTP_400_BAD_REQUEST)
+        
+
+    def update(self, request, pk=None,  partial=True):
+        onlinebank = get_object_or_404(OnlineBanking, pk=pk, user=request.user) 
+        serializer = self.serializer_class(onlinebank, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 
@@ -288,11 +302,24 @@ class CertificateViewset(viewsets.ModelViewSet):
         if user.is_authenticated or isinstance(user, CustomUser):
             serializers = self.serializer_class(data = request.data)
             serializers.is_valid(raise_exception= True)
-            serializers.save()
+            serializers.save(user_id=user.id)
             return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
+    def update(self, request, pk=None,  partial=True):
+        certificate = get_object_or_404(Certificates, pk=pk, user=request.user) 
+        serializer = self.serializer_class(certificate, data=request.data, partial=partial)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+
+
+
 
 class NoteViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
