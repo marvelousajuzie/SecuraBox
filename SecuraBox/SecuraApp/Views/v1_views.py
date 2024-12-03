@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from SecuraApp.models.v1_models import *
 from rest_framework.response import Response
 from rest_framework import status
+from SecuraApp.pagination import CustomPageNumberPagination
 from SecuraApp.Serializer.v1_serializer import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
@@ -141,9 +142,10 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
+    serializer_class = PasswordResetSerializer
 
     def post(self, request):
-        serializer = PasswordResetSerializer(data=request.data, context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
@@ -172,6 +174,7 @@ class SocialmediaViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = SocialmediaSerializer
     queryset = SocialMedia.objects.none()
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         return SocialMedia.objects.filter(user=self.request.user)
@@ -207,6 +210,7 @@ class MailViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = MailSerializer
     queryset = Mail.objects.none()
+    pagination_class = CustomPageNumberPagination
 
 
     def create(self, request):
@@ -235,6 +239,7 @@ class  OnlineBankViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = OnlineBankSerializer
     queryset = OnlineBanking.objects.none()
+    pagination_class = CustomPageNumberPagination
 
 
     def get_queryset(self):
@@ -266,6 +271,7 @@ class CreditCardViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CreditCardSerializer
     queryset = CreditCard.objects.none()
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         return CreditCard.objects.filter(user=self.request.user)
@@ -314,6 +320,7 @@ class CertificateViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CertificateSerializer
     queryset = Certificates.objects.none()
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         return Certificates.objects.filter(user=self.request.user)
@@ -346,6 +353,7 @@ class NoteViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = NoteSerializer
     queryset = Notes.objects.none()
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         return Notes.objects.filter(user=self.request.user)
@@ -376,6 +384,7 @@ class DocumentViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = DocumentSerializer
     queryset = Document.objects.none()
+    pagination_class = CustomPageNumberPagination
 
 
     def get_queryset(self):
