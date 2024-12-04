@@ -323,8 +323,8 @@ class CertificateViewset(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return Certificates.objects.filter(user=self.request.user)
-
+        return Certificates.objects.filter(user=self.request.user).order_by('id')
+    
     def create(self, request):
         user = self.request.user
         if user.is_authenticated or isinstance(user, CustomUser):
