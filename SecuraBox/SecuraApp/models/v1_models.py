@@ -192,8 +192,8 @@ class Certificates(models.Model):
     certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
     certificate_document = models.FileField(upload_to='certificates/', null=True, blank=True)
 
-
-
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.certificate_name
