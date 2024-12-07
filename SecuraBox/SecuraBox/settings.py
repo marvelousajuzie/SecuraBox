@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_cryptography', 
     'axes',
     'django_extensions',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -163,6 +164,18 @@ AUTH_USER_MODEL = 'SecuraApp.CustomUser'
 
 
 FIELD_ENCRYPTION_KEY = '75171jc1WzKBkvXqEQQJ3I1yMAHXNt0RG-jWPYu27ds='
+
+
+ASGI_APPLICATION = 'SecuraBox.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 

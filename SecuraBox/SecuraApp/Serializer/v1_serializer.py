@@ -156,11 +156,17 @@ class PinResetSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         user = self.context['request'].user
+        try:
+            user_pin = user.pin
+        except Pin.DoesNotExist:
+            raise serializers.ValidationError({"old_pin": "User does not have a PIN set."})
         old_pin = attrs.get('old_pin')
         new_pin = attrs.get('new_pin')
         confirm_pin = attrs.get('confirm_pin')
-        if user.otp != old_pin:
+
+        if not user_pin.verify_pin(old_pin):
             raise serializers.ValidationError({"old_pin": "Old PIN is incorrect."})
+
         if new_pin != confirm_pin:
             raise serializers.ValidationError({"confirm_pin": "New PIN and confirmation PIN do not match."})
 
@@ -171,8 +177,10 @@ class PinResetSerializer(serializers.Serializer):
 
     def save(self, **kwargs):
         user = self.context['request'].user
-        user.otp = self.validated_data['new_pin']
-        user.save()
+        user_pin = user.pin
+        user_pin.set_pin(self.validated_data['new_pin'])
+        user_pin.save()
+
         return user
 
 
@@ -252,7 +260,7 @@ class  NationalIDSerializer(serializers.ModelSerializer):
 class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificates
-        fields = [  'certificate_name', 'certificate_document']
+        fields = [ 'id',  'certificate_name', 'certificate_document']
 
     def validate_certificate_document(self, value):
         if value and not value.name.lower().endswith(('pdf', 'jpg', 'jpeg', 'png')):

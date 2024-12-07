@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 from django.conf import settings
+import datetime
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -98,6 +99,10 @@ class SocialMedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    class Meta:
+        ordering = ['-created_at'] 
+
     
     def __str__(self):
         return self.email or 'No Email'
@@ -115,6 +120,10 @@ class Mail(models.Model):
     mail_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        ordering = ['-created_at'] 
 
     
     def __str__(self):
@@ -141,6 +150,10 @@ class OnlineBanking(models.Model):
     bankname = models.CharField(max_length= 250, blank= True, null = True)
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        ordering = ['-created_at'] 
     
     def __str__(self):
         return self.username
@@ -160,6 +173,10 @@ class CreditCard(models.Model):
         help_text="Card color in hex format (e.g., #FF1100 for red).", blank= True, null = True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now= True)
+
+
+    class Meta:
+        ordering = ['-created_at'] 
 
 
     def __str__(self):
@@ -191,9 +208,12 @@ class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
     certificate_document = models.FileField(upload_to='certificates/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add= True) 
+    updated_at = models.DateTimeField(auto_now= True)
+
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-created_at'] 
 
     def __str__(self):
         return self.certificate_name
@@ -208,6 +228,10 @@ class Notes(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
 
 
+    class Meta:
+        ordering = ['-created_at'] 
+
+
     def __str__(self):
         return self.title
 
@@ -220,6 +244,21 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at'] 
 
     def __str__(self):
         return self.title
+    
+
+
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message
