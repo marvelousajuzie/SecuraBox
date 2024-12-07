@@ -149,7 +149,7 @@ class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Password updated successfully."}, status=status.HTTP_200_OK)
+            return Response({'success': True,"message": "Password reset successful!"}, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -162,7 +162,7 @@ class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "PIN updated successfully."}, status=status.HTTP_200_OK)
+            return Response({"message": "PIN updated successfully."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
