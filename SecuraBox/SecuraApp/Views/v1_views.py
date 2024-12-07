@@ -13,7 +13,8 @@ from SecuraApp.Serializer.v1_serializer import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from SecuraApp.emails import *
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 
@@ -155,9 +156,10 @@ class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
+    serializer_class = PinResetSerializer
 
     def post(self, request):
-        serializer = PinResetSerializer(data=request.data, context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "PIN updated successfully."}, status=status.HTTP_200_OK)
@@ -176,8 +178,9 @@ class SocialmediaViewset(viewsets.ModelViewSet):
     queryset = SocialMedia.objects.none()
     pagination_class = CustomPageNumberPagination
 
+
     def get_queryset(self):
-        return SocialMedia.objects.filter(user=self.request.user)
+        return SocialMedia.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = request.user
@@ -212,6 +215,9 @@ class MailViewset(viewsets.ModelViewSet):
     queryset = Mail.objects.none()
     pagination_class = CustomPageNumberPagination
 
+    def get_queryset(self):
+        return Mail.objects.filter(user=self.request.user).order_by('-created_at')
+
 
     def create(self, request):
         user = request.user
@@ -243,7 +249,7 @@ class  OnlineBankViewset(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        return OnlineBanking.objects.filter(user=self.request.user)
+        return OnlineBanking.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = request.user
@@ -274,7 +280,7 @@ class CreditCardViewset(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return CreditCard.objects.filter(user=self.request.user)
+        return CreditCard.objects.filter(user=self.request.user).order_by('-created_at')
         
 
     def create(self, request):
@@ -323,8 +329,8 @@ class CertificateViewset(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return Certificates.objects.filter(user=self.request.user).order_by('id')
-    
+        return Certificates.objects.filter(user=self.request.user).order_by('-created_at')
+
     def create(self, request):
         user = self.request.user
         if user.is_authenticated or isinstance(user, CustomUser):
@@ -356,7 +362,7 @@ class NoteViewset(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return Notes.objects.filter(user=self.request.user)
+        return Notes.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = self.request.user
@@ -388,7 +394,7 @@ class DocumentViewset(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        return Notes.objects.filter(user=self.request.user)
+        return Document.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = self.request.user
@@ -410,3 +416,19 @@ class DocumentViewset(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+
+
+
+
+def send_notification(user, message):
+    notification = Notification.objects.create(user=user, message=message)
+    channel_layer = get_channel_layer()
+    group_name = f"user_{user.id}"
+
+    async_to_sync(channel_layer.group_send)(
+        group_name,
+        {
+            'type': 'send_notification',
+            'message': message,
+        }
+    )
