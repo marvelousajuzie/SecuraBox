@@ -422,9 +422,12 @@ class DocumentViewset(viewsets.ModelViewSet):
 
 def send_notification(user, message):
     notification = Notification.objects.create(user=user, message=message)
-    channel_layer = get_channel_layer()
-    group_name = f"user_{user.id}"
 
+    channel_layer = get_channel_layer()
+    if channel_layer is None:
+        return
+
+    group_name = f"user_{user.id}"
     async_to_sync(channel_layer.group_send)(
         group_name,
         {

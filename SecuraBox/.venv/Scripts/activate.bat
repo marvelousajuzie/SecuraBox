@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=c:\Users\Marvel\Desktop\Marvel Works\MarvelProjectsSecuraBox\Project4\SecuraBox\.venv
+set VIRTUAL_ENV=C:\Users\Marvel\Desktop\SECURABOX-1\SecuraBox Backend\Project4\SecuraBox\.venv
 
 if not defined PROMPT set PROMPT=$P$G
 
