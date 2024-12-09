@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
@@ -96,8 +97,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'SecuraBox.wsgi.application'
+# WSGI_APPLICATION = 'SecuraBox.wsgi.application'
 
+
+ASGI_APPLICATION = 'SecuraBox.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
