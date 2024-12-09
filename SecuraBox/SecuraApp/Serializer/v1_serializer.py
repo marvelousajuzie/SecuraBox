@@ -188,7 +188,7 @@ class PinResetSerializer(serializers.Serializer):
 class SocialmediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = SocialMedia
-        fields = [ 'id', 'email', 'phone_number', 'password', 'profile_url']
+        fields = [ 'id', 'platform', 'email', 'phone_number', 'password', 'profile_url']
 
 
         

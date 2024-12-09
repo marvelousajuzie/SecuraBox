@@ -180,7 +180,11 @@ class SocialmediaViewset(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        return SocialMedia.objects.filter(user=self.request.user).order_by('-created_at')
+        queryset = SocialMedia.objects.filter(user=self.request.user).order_by('-created_at')
+        platform = self.request.query_params.get('platform', None)
+        if platform:
+            queryset = queryset.filter(platform=platform)
+        return queryset
 
     def create(self, request):
         user = request.user
@@ -191,7 +195,6 @@ class SocialmediaViewset(viewsets.ModelViewSet):
             return Response({'message': 'Created Successfully'}, status=status.HTTP_201_CREATED)
         else:
             return Response({'message': 'Not a valid user'}, status=status.HTTP_400_BAD_REQUEST)
-        
 
     def update(self, request, pk=None,  partial=True):
         social_media = get_object_or_404(SocialMedia, pk=pk, user=request.user) 
@@ -200,6 +203,16 @@ class SocialmediaViewset(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get'])
+    def platform_filter(self, request):
+        """Custom action to filter social media accounts by platform."""
+        platform = request.query_params.get('platform', None)
+        if platform:
+            social_media_accounts = SocialMedia.objects.filter(platform=platform, user=request.user).order_by('-created_at')
+            serializer = self.serializer_class(social_media_accounts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message': 'Platform parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
