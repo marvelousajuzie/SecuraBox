@@ -11,6 +11,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from cloudinary.models import CloudinaryField
+
+
+
+
 
 
 
@@ -128,11 +133,11 @@ class Mail(models.Model):
     PLATFORM_CHOICES = [
         ('email', 'Email'),
         ('yahoo', 'Yahoo'),
-        ('apple email', 'Apple Email'),
-        ('aol mail', 'Aol Mail'),
+        ('appleemail', 'AppleEmail'),
+        ('aolmail', 'AolMail'),
         ('outlook', 'Outlook'),
         ('zohoo', 'Zohoo'),
-        ('proton mail', 'Proton Mail'),
+        ('protonmail', 'ProtonMail'),
         ('gmx', 'Gmx'),
     ]
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
@@ -230,7 +235,7 @@ class NationalID(models.Model):
 class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
-    certificate_document = models.FileField(upload_to='certificates/', null=True, blank=True)
+    certificate_document = CloudinaryField('image') 
     created_at = models.DateTimeField(auto_now_add= True) 
     updated_at = models.DateTimeField(auto_now= True)
 
@@ -263,7 +268,7 @@ class Document(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
     title = models.CharField(max_length= 150, null= True, blank= True)
     description = models.TextField(null= True, blank= True)
-    file = models.FileField(upload_to='documents/')
+    document_file = CloudinaryField('image') 
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now=True)
 

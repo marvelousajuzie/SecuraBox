@@ -9,13 +9,7 @@ import cloudinary.api
 
 
 
-# CLOUDINARY_STORAGE = {
-#     'CLOUD_NAME': 'your_cloud_name',
-#     'API_KEY': 'your_api_key',
-#     'API_SECRET': 'your_api_secret',
-# }
 
-# DEFAULT_FILE_STORAGE = 'cloudinary.storage.MediaCloudinaryStorage'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,8 +43,11 @@ INSTALLED_APPS = [
     'SecuraApp',
     'django_cryptography', 
     'axes',
+    'django_ratelimit',
     'django_extensions',
     'channels',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -264,6 +261,15 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'SecuraBox',
+    'API_KEY': '724442339273472',
+    'API_SECRET': 'bWj8jjJoKIodhsi6CJ1tjylF8tY',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary.storage.MediaCloudinaryStorage'
 
 
 
