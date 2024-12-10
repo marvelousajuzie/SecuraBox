@@ -206,7 +206,6 @@ class SocialmediaViewset(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def platform_filter(self, request):
-        """Custom action to filter social media accounts by platform."""
         platform = request.query_params.get('platform', None)
         if platform:
             social_media_accounts = SocialMedia.objects.filter(platform=platform, user=request.user).order_by('-created_at')
@@ -229,8 +228,11 @@ class MailViewset(viewsets.ModelViewSet):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        return Mail.objects.filter(user=self.request.user).order_by('-created_at')
-
+        queryset = Mail.objects.filter(user=self.request.user).order_by('-created_at')
+        platform = self.request.query_params.get('platform', None)
+        if platform:
+            queryset = queryset.filter(platform=platform)
+        return queryset
 
     def create(self, request):
         user = request.user
@@ -250,6 +252,16 @@ class MailViewset(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get'])
+    def platform_filter(self, request):
+        platform = request.query_params.get('platform', None)
+        if platform:
+            mail_account = Mail.objects.filter(platform=platform, user=request.user).order_by('-created_at')
+            serializer = self.serializer_class(mail_account, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message': 'Platform parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 
