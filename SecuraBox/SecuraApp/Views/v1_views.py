@@ -15,6 +15,9 @@ from rest_framework.decorators import action
 from SecuraApp.emails import *
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from rest_framework.parsers import MultiPartParser, FormParser
+from SecuraApp.cloudinary import upload_to_cloudinary
+
 
 
 
@@ -352,27 +355,45 @@ class CertificateViewset(viewsets.ModelViewSet):
     serializer_class = CertificateSerializer
     queryset = Certificates.objects.none()
     pagination_class = CustomPageNumberPagination
+    parser_classes = [MultiPartParser, FormParser] 
 
     def get_queryset(self):
         return Certificates.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = self.request.user
-        if user.is_authenticated or isinstance(user, CustomUser):
-            serializers = self.serializer_class(data = request.data)
-            serializers.is_valid(raise_exception= True)
-            serializers.save(user_id=user.id)
-            return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
-        else:
-            return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
-        
-    def update(self, request, pk=None,  partial=True):
-        certificate = get_object_or_404(Certificates, pk=pk, user=request.user) 
+        if user.is_authenticated:
+            file = request.FILES.get('certificate_document')
+            if not file:
+                return Response({"error": "File is required"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                upload_result = upload_to_cloudinary(file, folder="certificates", tags=["certificate_upload"])
+            except Exception as e:
+                return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            data = request.data.copy()
+            data["certificate_document"] = upload_result["secure_url"]  
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+
+            return Response({"message": "Certificate created successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Not a valid user"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, pk=None, partial=True):
+        user = request.user
+        certificate = get_object_or_404(Certificates, pk=pk, user=user)
+        file = request.FILES.get('certificate_document')
+        if file:
+            try:
+                upload_result = upload_to_cloudinary(file, folder="certificates", tags=["certificate_update"])
+                request.data["certificate_document"] = upload_result["secure_url"] 
+            except Exception as e:
+                return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer = self.serializer_class(certificate, data=request.data, partial=partial)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Certificate updated successfully", "data": serializer.data}, status=status.HTTP_200_OK)
         
 
 
@@ -416,30 +437,45 @@ class DocumentViewset(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
     queryset = Document.objects.none()
     pagination_class = CustomPageNumberPagination
-
+    parser_classes = [MultiPartParser, FormParser]  
 
     def get_queryset(self):
         return Document.objects.filter(user=self.request.user).order_by('-created_at')
 
     def create(self, request):
         user = self.request.user
-        if user.is_authenticated or isinstance(user, CustomUser):
-            serializers = self.serializer_class(data = request.data)
-            serializers.is_valid(raise_exception= True)
-            serializers.save(user_id=user.id)
-            return Response({'message': 'Created Sucessfully'}, status= status.HTTP_201_CREATED)
-        else:
-            return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
+        if user.is_authenticated:
+            file = request.FILES.get('document_file')
+            if not file:
+                return Response({"error": "Document file is required"}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                upload_result = upload_to_cloudinary(file, folder="documents", tags=["document_upload"])
+            except Exception as e:
+                return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            data = request.data.copy()
+            data["document_file"] = upload_result["secure_url"] 
+            serializer = self.serializer_class(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user)
+            return Response({"message": "Document created successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
 
-
-
-    def update(self, request, pk=None,  partial=True):
-        document = get_object_or_404(Document, pk=pk, user=request.user) 
+    def update(self, request, pk=None, partial=True):
+        user = request.user
+        document = get_object_or_404(Document, pk=pk, user=user)
+        file = request.FILES.get('document_file')
+        if file:
+            try:
+                upload_result = upload_to_cloudinary(file, folder="documents", tags=["document_update"])
+                request.data["document_file"] = upload_result["secure_url"]  
+            except Exception as e:
+                return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         serializer = self.serializer_class(document, data=request.data, partial=partial)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Document updated successfully", "data": serializer.data}, status=status.HTTP_200_OK)
+
         
 
 
@@ -447,11 +483,9 @@ class DocumentViewset(viewsets.ModelViewSet):
 
 def send_notification(user, message):
     notification = Notification.objects.create(user=user, message=message)
-
     channel_layer = get_channel_layer()
     if channel_layer is None:
         return
-
     group_name = f"user_{user.id}"
     async_to_sync(channel_layer.group_send)(
         group_name,

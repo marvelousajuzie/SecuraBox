@@ -258,6 +258,7 @@ class  NationalIDSerializer(serializers.ModelSerializer):
 
 
 class CertificateSerializer(serializers.ModelSerializer):
+    certificate_document = serializers.ImageField() 
     class Meta:
         model = Certificates
         fields = [ 'id',  'certificate_name', 'certificate_document']
@@ -273,6 +274,7 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+    file = serializers.ImageField()
     class Meta:
         model = Document
-        fields =  [ 'id', 'title', 'description', 'file']
+        fields =  [ 'id', 'title', 'description', 'document_file']
