@@ -100,7 +100,7 @@ class SocialMedia(models.Model):
         ('x', 'X'),
         ('youtube', 'youtube'),
         ('behance', 'Behance'),
-        ('snapchap', 'Snapchat'),
+        ('snapchat', 'Snapchat'),
     ]
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
     platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, null=True, blank=True)
@@ -125,7 +125,18 @@ class SocialMedia(models.Model):
 
 
 class Mail(models.Model):
+    PLATFORM_CHOICES = [
+        ('email', 'Email'),
+        ('yahoo', 'Yahoo'),
+        ('apple email', 'Apple Email'),
+        ('aol mail', 'Aol Mail'),
+        ('outlook', 'Outlook'),
+        ('zohoo', 'Zohoo'),
+        ('proton mail', 'Proton Mail'),
+        ('gmx', 'Gmx'),
+    ]
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, null=True, blank=True)
     email = models.CharField(max_length= 200,  blank= True, null= True)
     phone_number = models.CharField(max_length=11, validators=[RegexValidator(r'^\d{11}$', 'PIN must be a 11-digit number.')], blank = True, null= True)
     password = EncryptedCharField(max_length=255, blank= True, null=True)

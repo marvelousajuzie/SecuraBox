@@ -197,7 +197,7 @@ class SocialmediaSerializer(serializers.ModelSerializer):
 class MailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mail
-        fields = [ 'id','email', 'phone_number', 'password', 'mail_url']
+        fields = [ 'id', 'platform','email', 'phone_number', 'password', 'mail_url']
 
 
     def create(self, validated_data):
