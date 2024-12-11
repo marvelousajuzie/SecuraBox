@@ -143,7 +143,7 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+#AUTHENTICATED
 class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = PasswordResetSerializer
@@ -170,6 +170,48 @@ class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LogoutSerializer  
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                refresh_token = serializer.validated_data['refresh']
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+    
+
+
+# Not AUTHENTICATED
+class ResetPasswordView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            otp = serializer.validated_data['otp']
+            new_password = serializer.validated_data['new_password']
+            try:
+                user = CustomUser.objects.get(email=email, otp=otp)
+                if user.otp_expires_at and user.otp_expires_at > now():
+                    user.password = make_password(new_password)
+                    user.otp = None  
+                    user.save()
+                    return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "OTP expired"}, status=status.HTTP_400_BAD_REQUEST)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "Invalid OTP or email"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 
