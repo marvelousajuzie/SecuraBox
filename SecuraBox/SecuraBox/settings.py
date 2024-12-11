@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'SecuraApp',
     'django_cryptography', 
     'axes',
-    'django_ratelimit',
+    # 'django_ratelimit',
     'django_extensions',
     'channels',
     'cloudinary',
@@ -264,12 +264,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'SecuraBox',
-    'API_KEY': '724442339273472',
-    'API_SECRET': 'bWj8jjJoKIodhsi6CJ1tjylF8tY',
+    'cloud_name': 'securabox',
+    'api_key': '724442339273472',
+    'api_secret': 'bWj8jjJoKIodhsi6CJ1tjylF8tY',
 }
 
-DEFAULT_FILE_STORAGE = 'cloudinary.storage.MediaCloudinaryStorage'
-
-
-
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

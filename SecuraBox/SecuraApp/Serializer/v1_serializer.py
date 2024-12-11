@@ -110,9 +110,31 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
             raise serializers.ValidationError('Must Include Email And Password')
         attrs['user'] = user
         return attrs
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(required=True)
+
+
+
+
+# NOT AUTHENTICATED
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=4)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
     
 
 
+
+
+#  AUTHENTICATED
 class PasswordResetSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
