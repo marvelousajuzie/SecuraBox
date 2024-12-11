@@ -118,7 +118,16 @@ class LogoutSerializer(serializers.Serializer):
 
 
 
-# NOT AUTHENTICATED
+# NOT AUTHENTICATED  PASSWORD RESET
+class RequestOTPTSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class VerifyOTPTSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=4)
+
+    
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=4)

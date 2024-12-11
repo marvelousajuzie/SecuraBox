@@ -192,7 +192,42 @@ class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     
 
 
-# Not AUTHENTICATED
+# Not AUTHENTICATED  PASSWORD RESET
+
+class RequestOTPView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    def post(self, request):
+        serializer = RequestOTPTSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user = CustomUser.objects.get(email=email)
+                user.otp = generate_otp()
+                user.otp_created_at = now()
+                user.otp_expires_at = get_otp_expiry()
+                user.save()
+                # Send OTP via email (email sending logic here)
+                return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyOTPView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    def post(self, request):
+        serializer = VerifyOTPTSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            otp = serializer.validated_data['otp']
+            try:
+                user = CustomUser.objects.get(email=email, otp=otp)
+                if user.otp_expires_at and user.otp_expires_at > now():
+                    return Response({"message": "OTP verified"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "OTP expired"}, status=status.HTTP_400_BAD_REQUEST)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "Invalid OTP or email"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 class ResetPasswordView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
