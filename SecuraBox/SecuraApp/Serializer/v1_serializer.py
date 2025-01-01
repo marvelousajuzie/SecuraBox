@@ -55,11 +55,15 @@ class OTPVerificationSerializer(serializers.Serializer):
         return attrs
 
 
+
+
+class ResendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
     
 
 class createPinSerializer(serializers.ModelSerializer):
     pin = serializers.CharField(write_only=True, min_length=4, max_length=4)
-
     class Meta:
         model = Pin
         fields = ['pin']
@@ -115,30 +119,59 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(required=True)
 
+    def save(self):
+        refresh_token = self.validated_data['refresh']
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return token
+
 
 
 
 # NOT AUTHENTICATED  PASSWORD RESET
-class RequestOTPTSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+class RequestOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
 
 
-class VerifyOTPTSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    otp = serializers.CharField(max_length=4)
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True, max_length=4)
+
+    def validate_email(self, value):
+        try:
+            user = CustomUser.objects.get(email=value)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+
+    def validate_otp(self, value):
+        if len(value) != 4:
+            raise serializers.ValidationError("OTP should be a 4-digit code.")
+        return value
+
 
     
-class ResetPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    otp = serializers.CharField(max_length=4)
-    new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
+class SetMasterPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    master_password = serializers.CharField(required=True, write_only=True, min_length=8)  # You can enforce min length
+    confirm_password = serializers.CharField(required=True, write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        try:
+            user = CustomUser.objects.get(email=value)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
 
     def validate(self, data):
-        if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords do not match")
+        if data['master_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
         return data
-    
 
 
 
@@ -289,23 +322,21 @@ class  NationalIDSerializer(serializers.ModelSerializer):
 
 
 class CertificateSerializer(serializers.ModelSerializer):
-    certificate_document = serializers.ImageField() 
     class Meta:
         model = Certificates
         fields = [ 'id',  'certificate_name', 'certificate_document']
 
-    def validate_certificate_document(self, value):
-        if value and not value.name.lower().endswith(('pdf', 'jpg', 'jpeg', 'png')):
-            raise serializers.ValidationError("Only image files are allowed.")
-        return value
 
+ 
 
 
 
 
 
 class DocumentSerializer(serializers.ModelSerializer):
-    file = serializers.ImageField()
     class Meta:
         model = Document
-        fields =  [ 'id', 'title', 'description', 'document_file']
+        fields = '__all__'
+
+    def validate_document_file(self, value):
+        return value

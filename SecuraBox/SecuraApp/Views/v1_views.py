@@ -2,6 +2,10 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import generics
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -17,6 +21,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from rest_framework.parsers import MultiPartParser, FormParser
 from SecuraApp.cloudinary import upload_to_cloudinary
+from SecuraApp.emailutility import generate_otp
 
 
 
@@ -87,6 +92,53 @@ class VerifyOTPViewSet(viewsets.ViewSet):
 
 
 
+class ResendOTPViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+        serializer = ResendOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                validate_email(email)
+            except ValidationError:
+                return Response(
+                    {'message': 'Invalid email address.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )            
+            try:
+                user = CustomUser.objects.get(email=email)
+                if user.is_active:
+                    return Response(
+                        {'message': 'Account is already active. No OTP required.'},
+                        status=status.HTTP_200_OK
+                    )
+                print(f"Attempting to send OTP to {email}...")
+                success, message = send_otp_via_email(email)
+                if success:
+                    return Response(
+                        {'message': "OTP has been resent successfully."},
+                        status=status.HTTP_200_OK
+                    )
+                else:
+                    return Response(
+                        {'message': f"Failed to send OTP: {message}."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            except CustomUser.DoesNotExist:
+                return Response(
+                    {'message': 'User with this email does not exist.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                return Response(
+                    {'message': 'An error occurred while processing the request.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        else:
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -136,11 +188,16 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
-            send_otp_via_email(user.email)
+            otp = generate_otp(length=4)
+            user.otp = otp
+            user.otp_expires_at = timezone.now() + timedelta(minutes=OTP_EXPIRATION_MINUTES)
+            user.save()
+            send_otp_via_email(user.email, otp)
             return Response({
                 'message': 'OTP sent to your email for verification. Please enter OTP to complete login.'
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 #AUTHENTICATED
@@ -170,11 +227,12 @@ class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
+
 class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = LogoutSerializer  
 
-    def post(self, request):
+    def create(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -186,7 +244,7 @@ class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 
     
@@ -194,60 +252,80 @@ class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Not AUTHENTICATED  PASSWORD RESET
 
-class RequestOTPView(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    def post(self, request):
-        serializer = RequestOTPTSerializer(data=request.data)
+class RequestOTPViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+        serializer = RequestOTPSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
             try:
                 user = CustomUser.objects.get(email=email)
-                user.otp = generate_otp()
-                user.otp_created_at = now()
-                user.otp_expires_at = get_otp_expiry()
+
+                otp = generate_otp(length=4)
+                user.otp = otp
+                user.otp_expires_at = timezone.now() + timedelta(minutes=OTP_EXPIRATION_MINUTES)
                 user.save()
-                # Send OTP via email (email sending logic here)
-                return Response({"message": "OTP sent to your email"}, status=status.HTTP_200_OK)
+
+                # Send OTP
+                send_otp_via_email(email, otp)
+
+                return Response({'message': 'OTP sent to your email.'}, status=status.HTTP_200_OK)
             except CustomUser.DoesNotExist:
-                return Response({"error": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response({'error': f'Failed to process your request: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class VerifyOTPView(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    def post(self, request):
-        serializer = VerifyOTPTSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            otp = serializer.validated_data['otp']
-            try:
-                user = CustomUser.objects.get(email=email, otp=otp)
-                if user.otp_expires_at and user.otp_expires_at > now():
-                    return Response({"message": "OTP verified"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"error": "OTP expired"}, status=status.HTTP_400_BAD_REQUEST)
-            except CustomUser.DoesNotExist:
-                return Response({"error": "Invalid OTP or email"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-class ResetPasswordView(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    def post(self, request):
-        serializer = ResetPasswordSerializer(data=request.data)
+
+
+# class VerifyOTPViewSet(viewsets.ViewSet):
+#     permission_classes = [AllowAny]
+
+#     def create(self, request):
+#         serializer = VerifyOTPSerializer(data=request.data)
+#         if serializer.is_valid():
+#             email = serializer.validated_data['email']
+#             otp = serializer.validated_data['otp']
+#             try:
+#                 user = CustomUser.objects.get(email=email)
+#                 if user.otp == otp and user.otp_expires_at > timezone.now():
+#                     user.otp = None
+#                     user.otp_expires_at = None
+#                     user.save()
+#                     refresh = RefreshToken.for_user(user)
+#                     return Response({
+#                         'refresh': str(refresh),
+#                         'access': str(refresh.access_token),
+#                         'message': 'OTP verified successfully!'
+#                     }, status=status.HTTP_200_OK)
+#                 else:
+#                     return Response({'message': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+#             except CustomUser.DoesNotExist:
+#                 return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class SetMasterPasswordViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request):
+        serializer = SetMasterPasswordSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            otp = serializer.validated_data['otp']
-            new_password = serializer.validated_data['new_password']
+            master_password = serializer.validated_data['master_password']
             try:
-                user = CustomUser.objects.get(email=email, otp=otp)
-                if user.otp_expires_at and user.otp_expires_at > now():
-                    user.password = make_password(new_password)
-                    user.otp = None  
-                    user.save()
-                    return Response({"message": "Password reset successfully"}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"error": "OTP expired"}, status=status.HTTP_400_BAD_REQUEST)
+                user = CustomUser.objects.get(email=email)
+                user.master_password = make_password(master_password) 
+                user.save()
+                return Response({'message': 'Master password set successfully!'}, status=status.HTTP_200_OK)
             except CustomUser.DoesNotExist:
-                return Response({"error": "Invalid OTP or email"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 
 
 
@@ -425,7 +503,7 @@ class NationalIDViewset(viewsets.ModelViewSet):
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
         
-            
+
 
 class CertificateViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -445,16 +523,21 @@ class CertificateViewset(viewsets.ModelViewSet):
                 return Response({"error": "File is required"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 upload_result = upload_to_cloudinary(file, folder="certificates", tags=["certificate_upload"])
+                certificate_document_url = upload_result["secure_url"]
             except Exception as e:
                 return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             data = request.data.copy()
-            data["certificate_document"] = upload_result["secure_url"]  
+            data["certificate_document"] = certificate_document_url  
+            data["user"] = user.id
             serializer = self.serializer_class(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user=user)
-
-            return Response({"message": "Certificate created successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
-
+            if serializer.is_valid():
+                serializer.save(user=user)
+                return Response({
+                    "message": "Certificate created successfully",
+                    "data": serializer.data
+                }, status=status.HTTP_201_CREATED)
+            else:
+                print(serializer.errors)
         return Response({"error": "Not a valid user"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk=None, partial=True):
@@ -527,16 +610,20 @@ class DocumentViewset(viewsets.ModelViewSet):
                 return Response({"error": "Document file is required"}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 upload_result = upload_to_cloudinary(file, folder="documents", tags=["document_upload"])
+                document_file_url = upload_result["secure_url"] 
             except Exception as e:
                 return Response({"error": f"Cloudinary upload failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             data = request.data.copy()
-            data["document_file"] = upload_result["secure_url"] 
+            data["document_file"] = document_file_url  
+            data["user"] = user.id
             serializer = self.serializer_class(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user=user)
-            return Response({"message": "Document created successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                print(serializer.validated_data)
+                serializer.save(user=user)
+                return Response({"message": "Document created successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
+            else:
+                print(serializer.errors)
         return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-
     def update(self, request, pk=None, partial=True):
         user = request.user
         document = get_object_or_404(Document, pk=pk, user=user)
