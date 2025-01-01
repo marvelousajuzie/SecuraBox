@@ -199,7 +199,6 @@ class UsersLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 #AUTHENTICATED
 class PasswordResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
@@ -227,7 +226,6 @@ class PinResetView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
-
 class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = LogoutSerializer  
@@ -244,7 +242,6 @@ class UsersLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
     
@@ -503,7 +500,6 @@ class NationalIDViewset(viewsets.ModelViewSet):
             return Response({'message': 'Not a Valid User'}, status= status.HTTP_400_BAD_REQUEST)
         
         
-
 
 class CertificateViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

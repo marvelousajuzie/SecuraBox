@@ -55,15 +55,22 @@ class OTPVerificationSerializer(serializers.Serializer):
         return attrs
 
 
+<<<<<<< HEAD
 
 
 class ResendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
+=======
+>>>>>>> origin/main
     
 
 class createPinSerializer(serializers.ModelSerializer):
     pin = serializers.CharField(write_only=True, min_length=4, max_length=4)
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
     class Meta:
         model = Pin
         fields = ['pin']
@@ -119,16 +126,20 @@ class CustomuserLoginSerialzer(serializers.ModelSerializer):
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(required=True)
 
+<<<<<<< HEAD
     def save(self):
         refresh_token = self.validated_data['refresh']
         token = RefreshToken(refresh_token)
         token.blacklist()
         return token
 
+=======
+>>>>>>> origin/main
 
 
 
 # NOT AUTHENTICATED  PASSWORD RESET
+<<<<<<< HEAD
 class RequestOTPSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
@@ -172,6 +183,28 @@ class SetMasterPasswordSerializer(serializers.Serializer):
         if data['master_password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords do not match.")
         return data
+=======
+class RequestOTPTSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class VerifyOTPTSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=4)
+
+    
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=4)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
+    
+>>>>>>> origin/main
 
 
 
@@ -322,21 +355,40 @@ class  NationalIDSerializer(serializers.ModelSerializer):
 
 
 class CertificateSerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
+=======
+    certificate_document = serializers.ImageField() 
+>>>>>>> origin/main
     class Meta:
         model = Certificates
         fields = [ 'id',  'certificate_name', 'certificate_document']
 
+<<<<<<< HEAD
 
  
+=======
+    def validate_certificate_document(self, value):
+        if value and not value.name.lower().endswith(('pdf', 'jpg', 'jpeg', 'png')):
+            raise serializers.ValidationError("Only image files are allowed.")
+        return value
+
+>>>>>>> origin/main
 
 
 
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+<<<<<<< HEAD
     class Meta:
         model = Document
         fields = '__all__'
 
     def validate_document_file(self, value):
         return value
+=======
+    file = serializers.ImageField()
+    class Meta:
+        model = Document
+        fields =  [ 'id', 'title', 'description', 'document_file']
+>>>>>>> origin/main

@@ -159,6 +159,19 @@ class Mail(models.Model):
     
 
 
+<<<<<<< HEAD
+=======
+# ADMIN USER
+class AdminOnlineBank(models.Model):
+    logo = models.ImageField(upload_to='online_banklogos/', default='path/to/default/image.jpg')
+    bank_name = models.CharField(max_length= 200)
+
+
+    def __str__(self):
+        return self.bank
+
+
+>>>>>>> origin/main
 
 
 class OnlineBanking(models.Model):
@@ -225,7 +238,12 @@ class NationalID(models.Model):
 class Certificates(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     certificate_name = models.CharField(max_length= 200,  blank=True, null=True)
+<<<<<<< HEAD
     certificate_document =  models.URLField('file',  null=True, blank=True ) 
+=======
+    certificate_document = CloudinaryField('image', null=True, blank=True )
+    certificate_document = CloudinaryField('file', null=True, blank=True) 
+>>>>>>> origin/main
     created_at = models.DateTimeField(auto_now_add= True) 
     updated_at = models.DateTimeField(auto_now= True)
 
@@ -258,7 +276,12 @@ class Document(models.Model):
     user = models.ForeignKey(CustomUser, on_delete= models.CASCADE)
     title = models.CharField(max_length= 150, null= True, blank= True)
     description = models.TextField(null= True, blank= True)
+<<<<<<< HEAD
     document_file = models.URLField('file',  null=True, blank=True ) 
+=======
+    document_file = CloudinaryField('image',  null=True, blank=True ) 
+    document_file = CloudinaryField('file',  null=True, blank=True ) 
+>>>>>>> origin/main
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now=True)
 
