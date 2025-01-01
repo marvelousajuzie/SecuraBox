@@ -5,7 +5,6 @@ import cloudinary.uploader
 def upload_to_cloudinary(file, folder="project_folder", tags=None, transformation=None):
     tags = tags or ['certificate_upload']
     transformation = transformation or {"width": 300, "height": 300, "crop": "fill"}
-<<<<<<< HEAD
     
     # Validation checks
     if not hasattr(file, 'read'):
@@ -17,23 +16,14 @@ def upload_to_cloudinary(file, folder="project_folder", tags=None, transformatio
 
     try:
         upload_result = cloudinary.uploader.upload(
-=======
-    try:
-        return cloudinary.uploader.upload(
->>>>>>> origin/main
             file,
             folder=folder,
             tags=tags,
             transformation=transformation
         )
-<<<<<<< HEAD
         print(f"Upload successful: {upload_result['secure_url']}")
         return upload_result
     except cloudinary.exceptions.Error as e:
         raise Exception(f"Cloudinary upload failed: {str(e)}")
     except Exception as e:
         raise Exception(f"An unexpected error occurred during Cloudinary upload: {str(e)}")
-=======
-    except Exception as e:
-        raise Exception(f"Cloudinary upload failed: {e}")
->>>>>>> origin/main
