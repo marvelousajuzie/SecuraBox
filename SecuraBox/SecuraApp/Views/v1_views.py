@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.timezone import now
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
@@ -108,7 +109,6 @@ class VerifyOTPViewSet(viewsets.ViewSet):
         except Exception as e:
             print(f"Unexpected error: {str(e)}")
             return Response({'message': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 class ResendOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
