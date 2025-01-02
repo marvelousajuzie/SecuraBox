@@ -1,5 +1,4 @@
 from django.utils import timezone
-from django.utils.timezone import now
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
@@ -58,64 +57,56 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 # VERIFY OTP FOR  LOGIN ACCOUNT
-
 class VerifyOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
-        print(f"Incoming request data: {request.data}")
-        email = request.data.get('email', '').lower()
+        email = request.data.get('email')
         otp = request.data.get('otp')
         purpose = request.data.get('purpose')
 
+        if not email or not otp or not purpose:
+            return Response({'message': 'Email, OTP, and purpose are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        email = email.lower()
+
         try:
-            print(f"Searching for user with email: {email}")
             user = CustomUser.objects.get(email=email)
-            print(f"User found: email={user.email}, otp={user.otp}, otp_expires_at={user.otp_expires_at}, now={now()}")
-
-            # Check if OTP and expiration date are valid
-            if user.otp == otp and user.otp_expires_at and user.otp_expires_at > timezone.now():
-                if purpose == 'register':
-                    print("Register purpose verified.")
-                    user.is_active = True
-                    user.otp = None
-                    user.otp_expires_at = None
-                    user.save()
-                    refresh = RefreshToken.for_user(user)
-                    return Response({
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
-                        'message': 'OTP verified successfully!'
-                    }, status=status.HTTP_200_OK)
-
-                elif purpose == 'login':
-                    print("Login purpose verified.")
-                    user.otp = None
-                    user.otp_expires_at = None
-                    user.save()
-                    refresh = RefreshToken.for_user(user)
-                    return Response({
-                        'refresh': str(refresh),
-                        'access': str(refresh.access_token),
-                        'message': 'OTP verified successfully!'
-                    }, status=status.HTTP_200_OK)
-                else:
-                    print("Invalid purpose specified.")
-                    return Response({'message': 'Invalid purpose specified.'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                # Handle invalid or expired OTP
-                if not user.otp_expires_at or user.otp_expires_at <= timezone.now():
-                    print("OTP is expired or not set.")
-                else:
-                    print("Invalid OTP provided.")
-                return Response({'message': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
-
         except CustomUser.DoesNotExist:
-            print("User not found.")
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            print(f"Unexpected error: {str(e)}")
-            return Response({'message': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Check if the OTP is valid and hasn't expired
+        if user.otp != otp or user.otp_expires_at <= timezone.now():
+            return Response({'message': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # OTP is valid, proceed with the purpose logic
+        if purpose == 'register':
+            user.is_active = True
+            user.otp = None
+            user.otp_expires_at = None
+            user.save()
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'message': 'OTP verified successfully!'
+            }, status=status.HTTP_200_OK)
+
+        elif purpose == 'login':
+            user.otp = None
+            user.otp_expires_at = None
+            user.save()
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'message': 'OTP verified successfully!'
+            }, status=status.HTTP_200_OK)
+
+        else:
+            return Response({'message': 'Invalid purpose specified.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class ResendOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
