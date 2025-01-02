@@ -14,7 +14,7 @@ load_dotenv()
 
 
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # Cloudinary configuration
 cloudinary.config(
