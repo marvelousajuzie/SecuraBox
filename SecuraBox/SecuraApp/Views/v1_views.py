@@ -175,7 +175,7 @@ class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 
-class VerifyPinView(viewsets.GenericViewSet):
+class VerifyPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = createPinSerializer 
 
