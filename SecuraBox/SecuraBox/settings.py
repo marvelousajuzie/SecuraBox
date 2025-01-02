@@ -6,9 +6,15 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from dotenv import load_dotenv
+from django.core.management.utils import get_random_secret_key
+
 
 # Load environment variables from .env file
 load_dotenv()
+
+
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # Cloudinary configuration
 cloudinary.config(
@@ -40,8 +46,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-
+# SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
