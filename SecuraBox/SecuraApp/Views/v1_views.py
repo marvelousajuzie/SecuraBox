@@ -22,6 +22,8 @@ from asgiref.sync import async_to_sync
 from rest_framework.parsers import MultiPartParser, FormParser
 from SecuraApp.cloudinary import upload_to_cloudinary
 from SecuraApp.emailutility import generate_otp
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -61,6 +63,7 @@ class VerifyOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
     def create(self, request):
+        logger.info(f"Request data: {request.data}")
         email = request.data.get('email')
         otp = request.data.get('otp')
         purpose = request.data.get('purpose')
