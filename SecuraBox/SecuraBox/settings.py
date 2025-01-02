@@ -51,7 +51,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ 'securabox-backend.onrender.com']
+
+# ALLOWED_HOSTS = [ ]
 
 
 # Application definition
@@ -144,6 +146,17 @@ ASGI_APPLICATION = 'SecuraBox.asgi.application'
 
 
 
+
+print("DB_NAME:", os.getenv('DB_NAME'))
+print("DB_USER:", os.getenv('DB_USER'))
+print("DB_PASSWORD:", os.getenv('DB_PASSWORD'))
+print("DB_HOST:", os.getenv('DB_HOST'))
+print("DB_PORT:", os.getenv('DB_PORT'))
+
+
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -152,6 +165,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
+        'OPTIONS': {
+            'sslmode': 'require',  
+        },
     }
 }
 
