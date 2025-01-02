@@ -58,6 +58,7 @@ class UsersRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 # VERIFY OTP FOR  LOGIN ACCOUNT
+
 class VerifyOTPViewSet(viewsets.ViewSet):
     permission_classes = [AllowAny]
 
@@ -71,8 +72,9 @@ class VerifyOTPViewSet(viewsets.ViewSet):
             print(f"Searching for user with email: {email}")
             user = CustomUser.objects.get(email=email)
             print(f"User found: email={user.email}, otp={user.otp}, otp_expires_at={user.otp_expires_at}, now={now()}")
-            
-            if user.otp == otp and user.otp_expires_at > timezone.now():
+
+            # Check if OTP and expiration date are valid
+            if user.otp == otp and user.otp_expires_at and user.otp_expires_at > timezone.now():
                 if purpose == 'register':
                     print("Register purpose verified.")
                     user.is_active = True
@@ -101,8 +103,13 @@ class VerifyOTPViewSet(viewsets.ViewSet):
                     print("Invalid purpose specified.")
                     return Response({'message': 'Invalid purpose specified.'}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                print(f"Invalid OTP or expired OTP. Received: {otp}, Stored: {user.otp}, Expired: {user.otp_expires_at <= timezone.now()}")
+                # Handle invalid or expired OTP
+                if not user.otp_expires_at or user.otp_expires_at <= timezone.now():
+                    print("OTP is expired or not set.")
+                else:
+                    print("Invalid OTP provided.")
                 return Response({'message': 'Invalid or expired OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
         except CustomUser.DoesNotExist:
             print("User not found.")
             return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
