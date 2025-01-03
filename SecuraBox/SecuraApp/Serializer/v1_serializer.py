@@ -264,17 +264,6 @@ class MailSerializer(serializers.ModelSerializer):
         fields = [ 'id', 'platform','email', 'phone_number', 'password', 'mail_url']
 
 
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        instance = super().create(validated_data)
-        instance.set_password(password)
-        return instance
-    
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            instance.set_password(validated_data.pop('password'))
-        return super().update(instance, validated_data)
-
 
 
 
