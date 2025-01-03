@@ -118,6 +118,7 @@ class ResendOTPViewSet(viewsets.ViewSet):
         serializer = ResendOTPSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
+            print(f"Validated email: {email}") 
             try:
                 validate_email(email)
             except ValidationError:
