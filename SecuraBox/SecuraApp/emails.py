@@ -69,5 +69,6 @@ def send_otp_via_email(email, otp):
 
     try:
         send_mail(subject, message, email_from, [email])
+        return True, "Email sent successfully."
     except Exception as e:
-        raise RuntimeError(f"Failed to send OTP email: {e}")
+        return False, str(e)

@@ -124,7 +124,8 @@ class ResendOTPViewSet(viewsets.ViewSet):
                 return Response(
                     {'message': 'Invalid email address.'},
                     status=status.HTTP_400_BAD_REQUEST
-                )            
+                )
+
             try:
                 user = CustomUser.objects.get(email=email)
                 if user.is_active:
@@ -132,8 +133,14 @@ class ResendOTPViewSet(viewsets.ViewSet):
                         {'message': 'Account is already active. No OTP required.'},
                         status=status.HTTP_200_OK
                     )
-                print(f"Attempting to send OTP to {email}...")
-                success, message = send_otp_via_email(email)
+
+                # Generate and resend OTP
+                otp = generate_otp()
+                user.otp = otp
+                user.otp_expires_at = timezone.now() + timedelta(minutes=OTP_EXPIRATION_MINUTES)
+                user.save()
+
+                success, message = send_otp_via_email(email, otp)
                 if success:
                     return Response(
                         {'message': "OTP has been resent successfully."},
@@ -150,14 +157,11 @@ class ResendOTPViewSet(viewsets.ViewSet):
                     status=status.HTTP_404_NOT_FOUND
                 )
             except Exception as e:
-                print(f"Unexpected error: {e}")
                 return Response(
-                    {'message': 'An error occurred while processing the request.'},
+                    {'message': f'An error occurred: {str(e)}'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-        else:
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class createPinView(mixins.CreateModelMixin, viewsets.GenericViewSet):
